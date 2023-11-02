@@ -7,12 +7,19 @@ class LeverBase():
         self.state = 0
         self.name = leverName
         
+    def switch_state(self):
+        if self.state == 0:
+            self.state = 1
+        else:
+            self.state = 0
+        for ev in self.events:
+            ev.on_lever_state_change(self.state)
+            
     def update_state(self):
         pass
     
-    def execute_events(self):
-        for ev in self.events:
-            ev.on_lever_state_change(self.state)
+    def update(self):
+        self.update_state()
     
     def add_event(self, event):
         if not isinstance(event, LeverEventBase):
