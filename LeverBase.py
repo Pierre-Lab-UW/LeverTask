@@ -1,4 +1,4 @@
-from EventBase import LeverEventBase
+from LeverEventBase import LeverEventBase
 
 class LeverBase():
     def __init__(self,leverName):
@@ -15,11 +15,13 @@ class LeverBase():
         for ev in self.events:
             ev.on_lever_state_change(self.state)
             
-    def update_state(self):
+    def update_state_continously(self):
         pass
     
     def update(self):
-        self.update_state()
+        self.update_state_continously()
+        for ev in self.events:
+            ev.on_lever_update()
     
     def add_event(self, event):
         if not isinstance(event, LeverEventBase):
