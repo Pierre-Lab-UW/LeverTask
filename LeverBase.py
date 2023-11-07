@@ -8,6 +8,7 @@ class LeverBase():
         self.name = leverName
         
     def switch_state(self):
+        #potential problem where state isn't synced properly with hardware
         if self.state == 0:
             self.state = 1
         else:

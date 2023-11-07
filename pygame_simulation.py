@@ -1,7 +1,8 @@
-import pygame
+import pygame,sys
 from pygame.locals import *
 from LeverBase import LeverBase
 from LeverEventBase import LeverEventBase, DebugEvent
+from Events.ResetLeverEvent import *
 
 pygame.init()
 
@@ -43,11 +44,16 @@ lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
 #add a debug event for helful logging
 lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
 lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
+lever_pygame_2.add_event(ResetLeverEvent("reset",lever_pygame_2, 5))
 
 clock = pygame.time.Clock()
 while True:
     clock.tick(60)
     pygame_events = pygame.event.get()
+    for event in pygame_events:
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit(0)
     lever_pygame_1.update()
     lever_pygame_2.update()
     pygame.display.update()
