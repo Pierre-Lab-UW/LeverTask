@@ -10,4 +10,4 @@ class RecordDataEvent(LeverEventBase):
         
     def on_lever_state_change(self, new_lever_state):
         self.timestamps[time.time()-self.start_time] = new_lever_state
-        #print(self.timestamps)
+        print(self.timestamps)

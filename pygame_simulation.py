@@ -29,7 +29,7 @@ class PyGameLever(LeverBase):
                     self.set_state(STATE_PRESSED)
                 elif self.state == STATE_PRESSED:
                     self.set_state(STATE_UNPRESSED)
-            else:
+            elif self.state == STATE_PRESSED:
                 self.set_state(STATE_UNPRESSED)        
     def draw(self):
         if self.state == STATE_UNPRESSED:
@@ -49,6 +49,7 @@ lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
 lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
 lever_pygame_2.add_event(RecordDataEvent("record",lever_pygame_2))
 
+pygame_events = pygame.event.get()
 clock = pygame.time.Clock()
 while True:
     clock.tick(60)
