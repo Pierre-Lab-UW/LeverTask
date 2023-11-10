@@ -1,8 +1,8 @@
 import pygame,sys
 from pygame.locals import *
-from LeverBase import LeverBase
+from LeverBase import *
 from LeverEventBase import LeverEventBase, DebugEvent
-from Events.ResetLeverEvent import *
+from Events.RecordDataEvent import *
 
 pygame.init()
 
@@ -26,10 +26,13 @@ class PyGameLever(LeverBase):
                 x_pos, y_pos = pygame.mouse.get_pos()
                 #print(x_pos, y_pos, self.x - float(self.width/2), self.x + float(self.width/2))
                 if x_pos > self.x and x_pos < self.x + self.width and y_pos > self.y and y_pos < self.y + self.height:
-                    self.switch_state()
-                 
+                    self.set_state(STATE_PRESSED)
+                elif self.state == STATE_PRESSED:
+                    self.set_state(STATE_UNPRESSED)
+            else:
+                self.set_state(STATE_UNPRESSED)        
     def draw(self):
-        if self.state == 0:
+        if self.state == STATE_UNPRESSED:
             pygame.draw.rect(window, (255,0,0), [self.x,self.y,self.width,self.height],0)
         else:
             pygame.draw.rect(window, (0,255,0), [self.x,self.y,self.width,self.height],0)
@@ -44,7 +47,7 @@ lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
 #add a debug event for helful logging
 lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
 lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
-lever_pygame_2.add_event(ResetLeverEvent("reset",lever_pygame_2, 5))
+lever_pygame_2.add_event(RecordDataEvent("record",lever_pygame_2))
 
 clock = pygame.time.Clock()
 while True:

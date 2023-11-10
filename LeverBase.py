@@ -1,18 +1,21 @@
 from LeverEventBase import LeverEventBase
 
+STATE_UNPRESSED = 0
+STATE_PRESSED = 1
+
 class LeverBase():
     def __init__(self,leverName):
         self.events = []
         #0 means lever isn't pressed, 1 means it has been pressed
-        self.state = 0
+        self.state = STATE_UNPRESSED
         self.name = leverName
-        
-    def switch_state(self):
-        #potential problem where state isn't synced properly with hardware
-        if self.state == 0:
-            self.state = 1
-        else:
-            self.state = 0
+    
+    def get_state(self):
+        return self.state
+    
+    def set_state(self, state):
+        #check if the state is already currently set to what we want to prevent events form running every frame
+        self.state = state
         for ev in self.events:
             ev.on_lever_state_change(self.state)
             
