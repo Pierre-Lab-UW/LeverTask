@@ -47,7 +47,8 @@ lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
 #add a debug event for helful logging
 lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
 lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
-lever_pygame_2.add_event(RecordDataEvent("record",lever_pygame_2))
+ev = RecordDataEvent("record",lever_pygame_2)
+lever_pygame_2.add_event(ev)
 
 pygame_events = pygame.event.get()
 clock = pygame.time.Clock()
@@ -56,8 +57,10 @@ while True:
     pygame_events = pygame.event.get()
     for event in pygame_events:
         if event.type == QUIT:
+            print(ev.timestamps)
             pygame.quit()
             sys.exit(0)
     lever_pygame_1.update()
     lever_pygame_2.update()
     pygame.display.update()
+
