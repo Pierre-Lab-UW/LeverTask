@@ -21,7 +21,7 @@ class LeverPressedEvent(LeverEventBase):
     #def on_lever_update(self):
         
 
-
+#finish implementing cooldowns and showing the lever after some time
 class FixedRatioTraining(Training):
     def __init__(self, lever1, lever2, params = {}) -> None:
         super().__init__(lever1, lever2, params)
