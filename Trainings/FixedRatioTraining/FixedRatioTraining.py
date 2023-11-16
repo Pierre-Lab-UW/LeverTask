@@ -1,5 +1,6 @@
 from Training import *
-from LeverEventBase import *
+from LeverEventBase import LeverEventBase
+from LeverBase import STATE_PRESSED, STATE_UNPRESSED
 
 
 class LeverPressedEvent(LeverEventBase):
@@ -7,13 +8,18 @@ class LeverPressedEvent(LeverEventBase):
         super().__init__(event_name, lever)
         self.pressed_count  = 0
         self.max_count = max_count
-    
+
     def on_lever_state_change(self, new_lever_state):
         if new_lever_state == STATE_PRESSED:
             self.pressed_count += 1
+            print("Count: "+str(self.pressed_count))
         if self.pressed_count == self.max_count:
             print("Pellet dispense!")
-            self.max_count = 0
+            self.pressed_count = 0
+            self.lever.set_is_availiable(False)
+    
+    #def on_lever_update(self):
+        
 
 
 class FixedRatioTraining(Training):
@@ -21,6 +27,13 @@ class FixedRatioTraining(Training):
         super().__init__(lever1, lever2, params)
 
     def start_event(self):
-        self.lever1.add_event()
+        self.lever1.add_event(LeverPressedEvent("lever_press", self.lever1, 5))
+        self.lever2.add_event(LeverPressedEvent("lever_press", self.lever2, 5))
+
+    def stop_event(self):
+        self.lever1.events.clear()
+        self.lever2.events.clear()
+        
+        
     
     

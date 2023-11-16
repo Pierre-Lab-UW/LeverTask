@@ -3,6 +3,7 @@ from pygame.locals import *
 from LeverBase import *
 from LeverEventBase import LeverEventBase, DebugEvent
 from Events.RecordDataEvent import *
+from Trainings.FixedRatioTraining.FixedRatioTraining import *
 
 pygame.init()
 
@@ -19,7 +20,7 @@ class PyGameLever(LeverBase):
         self.height = height
     
     def update_state_continously(self):
-        if pygame_events == None:
+        if pygame_events == None or not self.is_avaliable:
             return
         for event in pygame_events:
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -30,25 +31,31 @@ class PyGameLever(LeverBase):
                 elif self.state == STATE_PRESSED:
                     self.set_state(STATE_UNPRESSED)
             elif self.state == STATE_PRESSED:
-                self.set_state(STATE_UNPRESSED)        
+                self.set_state(STATE_UNPRESSED)   
+                     
     def draw(self):
+        if not self.is_avaliable:
+            return
         if self.state == STATE_UNPRESSED:
             pygame.draw.rect(window, (255,0,0), [self.x,self.y,self.width,self.height],0)
         else:
             pygame.draw.rect(window, (0,255,0), [self.x,self.y,self.width,self.height],0)
-            
+        
     def update(self):
         super().update()
         self.draw()
-    
+
+
+
 lever_pygame_1 = PyGameLever("Lever1",  100, 350, 100, 100)
 lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
 
 #add a debug event for helful logging
 lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
 lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
-ev = RecordDataEvent("record",lever_pygame_2)
-lever_pygame_2.add_event(ev)
+#start a fixed ratio training
+fixed_ratio_training = FixedRatioTraining(lever_pygame_1 , lever_pygame_2)
+fixed_ratio_training.start_event()
 
 pygame_events = pygame.event.get()
 clock = pygame.time.Clock()
@@ -57,9 +64,10 @@ while True:
     pygame_events = pygame.event.get()
     for event in pygame_events:
         if event.type == QUIT:
-            print(ev.timestamps)
+            fixed_ratio_training.stop_event()
             pygame.quit()
             sys.exit(0)
+    window.fill([255,255,255])
     lever_pygame_1.update()
     lever_pygame_2.update()
     pygame.display.update()

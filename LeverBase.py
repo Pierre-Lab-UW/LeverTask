@@ -9,6 +9,7 @@ class LeverBase():
         #0 means lever isn't pressed, 1 means it has been pressed
         self.state = STATE_UNPRESSED
         self.name = leverName
+        self.is_avaliable = True
     
     def get_state(self):
         return self.state
@@ -34,6 +35,7 @@ class LeverBase():
             raise Exception(event.name + " is already in the events for this lever!")
         self.events.append(event)
             
-    
+    def set_is_availiable(self, val):
+        self.is_avaliable = val
     
     
