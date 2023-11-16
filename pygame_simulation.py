@@ -20,7 +20,7 @@ class PyGameLever(LeverBase):
         self.height = height
     
     def update_state_continously(self):
-        if pygame_events == None or not self.is_avaliable:
+        if pygame_events == None or not self.active:
             return
         for event in pygame_events:
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -34,7 +34,7 @@ class PyGameLever(LeverBase):
                 self.set_state(STATE_UNPRESSED)   
                      
     def draw(self):
-        if not self.is_avaliable:
+        if not self.active:
             return
         if self.state == STATE_UNPRESSED:
             pygame.draw.rect(window, (255,0,0), [self.x,self.y,self.width,self.height],0)
@@ -54,7 +54,8 @@ lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
 lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
 lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
 #start a fixed ratio training
-fixed_ratio_training = FixedRatioTraining(lever_pygame_1 , lever_pygame_2)
+fixed_ratio_parameters = {"lever_presses":5, "update_interval":3}
+fixed_ratio_training = FixedRatioTraining(lever_pygame_1 , lever_pygame_2, fixed_ratio_parameters)
 fixed_ratio_training.start_event()
 
 pygame_events = pygame.event.get()
