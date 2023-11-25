@@ -18,13 +18,13 @@ class LeverPressedEvent(LeverEventBase):
         if self.pressed_count == self.max_count:
             print("Pellet dispense!")
             self.pressed_count = 0
-            self.lever.set_is_availiable(False)
+            self.lever.set_is_active(False)
             self.last_lever_reset = time.time()
             
     def on_lever_update(self):
         if time.time() - self.last_lever_reset > self.rest_interval:
             if not self.lever.active:
-                self.lever.set_is_availiable(True)
+                self.lever.set_is_active(True)
                 
 #finish implementing cooldowns and showing the lever after some time
 class FixedRatioTraining(Training):

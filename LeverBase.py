@@ -63,5 +63,6 @@ class LeverBase():
             
     def set_is_active(self, val):
         self.active = val
+        self.state = STATE_UNPRESSED
     
     
