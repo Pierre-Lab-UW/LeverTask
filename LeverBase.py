@@ -33,6 +33,9 @@ class LeverBase():
         return self.state
     
     def set_state(self, state):
+        """
+        Sets the state of the lever if it's pressed or not. 
+        """
         #check if the state is already currently set to what we want to prevent events form running every frame
         self.state = state
         for ev in self.events:
