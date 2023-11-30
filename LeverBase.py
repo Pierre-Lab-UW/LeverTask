@@ -17,12 +17,12 @@ class LeverBase():
         name (str): The name of the lever(Used for equality checking).
         active (bool): Stores if the lever can be pressed or not
     '''
-    def __init__(self,leverName):
-        self.events = []
+    def __init__(self,leverName: str):
+        self.events: list[LeverEventBase] = []
         #0 means lever isn't pressed, 1 means it has been pressed
-        self.state = STATE_UNPRESSED
-        self.name = leverName
-        self.active = True
+        self.state:int = STATE_UNPRESSED
+        self.name:str = leverName
+        self.active:bool = True
     
     def get_state(self) -> int:
         '''Returns the current state of the lever.
@@ -32,9 +32,14 @@ class LeverBase():
         '''
         return self.state
     
-    def set_state(self, state):
+    def set_state(self, state:int):
         """
         Sets the state of the lever if it's pressed or not. 
+
+        Parameters
+        ----------
+        state : int 
+            The value that we want to set the state to. 0 if the lever is not being pressed, 1 if the lever is being pressed.
         """
         #check if the state is already currently set to what we want to prevent events form running every frame
         self.state = state
@@ -57,15 +62,30 @@ class LeverBase():
         for ev in self.events:
             ev.on_lever_update()
     
-    def add_event(self, event):
+    def add_event(self, event: LeverEventBase):
+        """
+        Adds a LeverEvent to this lever for it to execute as a callback function. 
+
+        Parameters
+        ----------
+        event : LeverEventBase 
+            The LeverEventBase that we want to be ran during callbacks.
+        """
         if not isinstance(event, LeverEventBase):
             raise Exception("{event} must be a LeverEventBase!")
         if event in self.events:
             raise Exception(event.name + " is already in the events for this lever!")
         self.events.append(event)
             
-    def set_is_active(self, val):
+    def set_is_active(self, val: bool):
+        """
+        Sets if the lever is currently avaliable to be pressed. It also resets the lever to being 
+
+        Parameters
+        ----------
+        val : bool 
+            A boolean representing if the lever can be pressed or not.
+        """
         self.active = val
-        self.state = STATE_UNPRESSED
     
     

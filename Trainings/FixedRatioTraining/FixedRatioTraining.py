@@ -15,7 +15,9 @@ class LeverPressedEvent(LeverEventBase):
         if new_lever_state == STATE_PRESSED:
             self.pressed_count += 1
             print("Count: "+str(self.pressed_count))
-        if self.pressed_count == self.max_count:
+            return
+        
+        if new_lever_state == STATE_UNPRESSED and self.pressed_count == self.max_count:
             print("Pellet dispense!")
             self.pressed_count = 0
             self.lever.set_is_active(False)
