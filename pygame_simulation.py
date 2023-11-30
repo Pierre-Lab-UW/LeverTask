@@ -41,8 +41,6 @@ class PyGameLever(LeverBase):
         else:
             pygame.draw.rect(window, (0,255,0), [self.x,self.y,self.width,self.height],0)
 
-        
-
     def update(self):
         super().update()
         self.draw()

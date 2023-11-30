@@ -1,7 +1,9 @@
+from LeverBase import LeverBase
+
 class LeverEventBase:
-    def __init__(self, event_name, lever):
-        self.name = event_name
-        self.lever = lever
+    def __init__(self, event_name:str, lever:LeverBase):
+        self.name:str = event_name
+        self.lever:LeverBase = lever
     
     def __eq__(self, other):
         return other.name == self.name
