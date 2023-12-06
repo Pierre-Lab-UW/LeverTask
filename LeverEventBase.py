@@ -1,9 +1,19 @@
-from LeverBase import LeverBase
-
 class LeverEventBase:
-    def __init__(self, event_name:str, lever:LeverBase):
+    '''
+    The LeverEventBase class contains different callback functions for the lever that can be overrided for custom use.
+    
+    Args:
+        event_name (str): The name of the event. Used in order to prevent duplicate events from being ran on an event.
+        lever (LeverBase): The LeverBase object that will run this event.
+    Attributes:
+        events (list[EventBase]): A list of events that will be executed as callback functions when something happens to the lever.
+        state (int): An int that represents if the lever has been pressed or not. Should only be 0 or 1
+        name (str): The name of the lever(Used for equality checking).
+        active (bool): Stores if the lever can be pressed or not
+    '''
+    def __init__(self, event_name:str, lever):
         self.name:str = event_name
-        self.lever:LeverBase = lever
+        self.lever = lever
     
     def __eq__(self, other):
         return other.name == self.name

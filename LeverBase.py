@@ -1,7 +1,7 @@
 from LeverEventBase import LeverEventBase
 
-STATE_UNPRESSED = 0
-STATE_PRESSED = 1
+STATE_UNPRESSED:int = 0
+STATE_PRESSED:int = 1
 
 class LeverBase():
     '''
@@ -9,7 +9,7 @@ class LeverBase():
     This class can be inherited and modified to work with different types of levers
     
     Args:
-        leverName (str): The name of the lever.
+        lever_name (str): The name of the lever.
     
     Attributes:
         events (list[EventBase]): A list of events that will be executed as callback functions when something happens to the lever.
@@ -17,11 +17,11 @@ class LeverBase():
         name (str): The name of the lever(Used for equality checking).
         active (bool): Stores if the lever can be pressed or not
     '''
-    def __init__(self,leverName: str):
+    def __init__(self,lever_name: str):
         self.events: list[LeverEventBase] = []
         #0 means lever isn't pressed, 1 means it has been pressed
         self.state:int = STATE_UNPRESSED
-        self.name:str = leverName
+        self.name:str = lever_name
         self.active:bool = True
     
     def get_state(self) -> int:
@@ -75,11 +75,12 @@ class LeverBase():
             raise Exception("{event} must be a LeverEventBase!")
         if event in self.events:
             raise Exception(event.name + " is already in the events for this lever!")
+        #TODO:check for duplicate events
         self.events.append(event)
             
     def set_is_active(self, val: bool):
         """
-        Sets if the lever is currently avaliable to be pressed. It also resets the lever to being 
+        Sets if the lever is currently avaliable to be pressed. 
 
         Parameters
         ----------
