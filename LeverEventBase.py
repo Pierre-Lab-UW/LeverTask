@@ -6,28 +6,36 @@ class LeverEventBase:
         event_name (str): The name of the event. Used in order to prevent duplicate events from being ran on an event.
         lever (LeverBase): The LeverBase object that will run this event.
     Attributes:
-        events (list[EventBase]): A list of events that will be executed as callback functions when something happens to the lever.
-        state (int): An int that represents if the lever has been pressed or not. Should only be 0 or 1
-        name (str): The name of the lever(Used for equality checking).
-        active (bool): Stores if the lever can be pressed or not
+        name (str): The name of the event.
+        lever (LeverBase) The Lever that this event is attached to.
     '''
     def __init__(self, event_name:str, lever):
         self.name:str = event_name
         self.lever = lever
     
-    def __eq__(self, other):
-        return other.name == self.name
-    
     def on_lever_initialize(self):
+        '''Runs as soon as the lever initializes.'''
         pass
     
     def on_lever_update(self):
+        '''Called continuously while the lever is active.'''
         pass
     
     def on_lever_state_change(self, new_lever_state):
+        """
+        Called when the state of the lever changes(Pressed or Unpressed).
+
+        Parameters
+        ----------
+        state : int 
+            The new state of the lever. 0 if the lever is not being pressed, 1 if the lever is being pressed.
+        """
         pass
     
     def on_lever_stopped():
+        """
+        Called when the lever is stopped(usually at the end of a training).
+        """
         pass
 
 
