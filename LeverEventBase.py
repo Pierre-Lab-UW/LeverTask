@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import Type
+
 class LeverEventBase:
     '''
     The LeverEventBase class contains different callback functions for the lever that can be overrided for custom use.
@@ -11,7 +14,7 @@ class LeverEventBase:
     '''
     def __init__(self, event_name:str, lever):
         self.name:str = event_name
-        self.lever = lever
+        self.lever:LeverBase = lever
     
     def on_lever_initialize(self):
         '''Runs as soon as the lever initializes.'''
