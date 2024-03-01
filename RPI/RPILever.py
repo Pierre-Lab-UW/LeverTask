@@ -12,6 +12,7 @@ class RPILever(LeverBase):
         super().__init__(lever_name)
         self.input_pin = input_pin #pin that reads in if the lever is being pressed
         self.output_pin = output_pin #pin that controls the lever active property
+        GPIO.setmode(GPIO.BCM)  
         GPIO.setup(self.input_pin, GPIO.IN)
         GPIO.setup(self.output_pin, GPIO.OUT)
 
@@ -27,3 +28,16 @@ class RPILever(LeverBase):
             GPIO.output(self.output_pin, 1)
         else:
             GPIO.output(self.output_pin, 0)
+
+if __name__ == "main":
+    import time 
+
+    lever:LeverBase = RPILever("rpi_lever", 23, 24)
+
+    lever.set_is_active(not lever.active)
+    time.sleep(5)
+    lever.set_is_active(not lever.active)
+
+
+
+    
