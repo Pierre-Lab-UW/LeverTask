@@ -29,7 +29,7 @@ class RPILever(LeverBase):
         else:
             GPIO.output(self.output_pin, 0)
 
-if __name__ == "main":
+if __name__ == "__main__":
     print("Testing Hardware Lever...")
     import time 
 
