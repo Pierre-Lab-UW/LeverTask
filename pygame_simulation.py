@@ -4,7 +4,7 @@ from LeverBase import *
 from LeverEventBase import LeverEventBase, DebugEvent
 from Events.RecordDataEvent import *
 from Trainings.FixedRatioTraining.FixedRatioTraining import *
-from RPI.RPILever import RPILever
+from RPILever import RPILever
 pygame.init()
 
 window = pygame.display.set_mode((600,600))
