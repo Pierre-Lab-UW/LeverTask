@@ -42,8 +42,5 @@ if __name__ == "__main__":
     time.sleep(2)
     lever.set_is_active(not lever.active)
     print("Test 1")
-    time.sleep(5)
-    lever.set_is_active(not lever.active)
-    print("Test 2")
     while True:
         lever.update_state_continously()
