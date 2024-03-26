@@ -21,6 +21,7 @@ class RPILever(LeverBase):
         input_pin_val = GPIO.input(self.input_pin)
         if self.state != input_pin_val:
             print(str(self.stateCount)+") New State: "+str(input_pin_val))
+            self.stateCount += 1
         self.set_state(input_pin_val)
         #check for state via output pin of lever
     def set_is_active(self, val: bool):
