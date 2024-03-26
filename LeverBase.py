@@ -23,25 +23,25 @@ class LeverBase():
         self.state:int = STATE_UNPRESSED
         self.name:str = lever_name
         self.active:bool = True
-    
     def get_state(self) -> int:
         '''Returns the current state of the lever.
-        
+
            Returns:
                 0 if the lever isn't pressed, 1 if it is pressed
         '''
         return self.state
-    
     def set_state(self, state:int):
         """
         Sets the state of the lever if it's pressed or not. 
 
         Parameters
         ----------
-        state : int 
+        state : int
             The value that we want to set the state to. 0 if the lever is not being pressed, 1 if the lever is being pressed.
         """
         #check if the state is already currently set to what we want to prevent events form running every frame
+        if self.state != state:
+            print("New state: "+str(state))
         self.state = state
         for ev in self.events:
             ev.on_lever_state_change(self.state)
