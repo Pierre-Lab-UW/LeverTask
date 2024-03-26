@@ -42,9 +42,9 @@ class LeverBase():
         #check if the state is already currently set to what we want to prevent events form running every frame
         if self.state != state:
             print("New state: "+str(state))
-        self.state = state
-        for ev in self.events:
-            ev.on_lever_state_change(self.state)
+            self.state = state
+            for ev in self.events:
+                ev.on_lever_state_change(self.state)
     
     def update_state_continously(self):
         """
