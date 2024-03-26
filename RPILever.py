@@ -14,7 +14,7 @@ class RPILever(LeverBase):
         self.output_pin = output_pin #pin that controls the lever active property
         self.stateCount = 0
         GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.input_pin, GPIO.IN)
+        GPIO.setup(self.input_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.output_pin, GPIO.OUT)
 
     def update_state_continously(self) -> None:
