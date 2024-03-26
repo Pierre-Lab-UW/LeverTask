@@ -1,4 +1,4 @@
-from LeverBase import LeverBase 
+from LeverBase import LeverBase
 try:
     # checks if you have access to RPi.GPIO, which is available inside RPi
     import RPi.GPIO as GPIO
@@ -42,4 +42,5 @@ if __name__ == "__main__":
     lever.set_is_active(not lever.active)
     print("Test 2")
     while True:
+        print("a")
         lever.update_state_continously()
