@@ -1,4 +1,4 @@
-from LeverBase import LeverBase 
+from LeverBase import LeverBase
 try:
     # checks if you have access to RPi.GPIO, which is available inside RPi
     import RPi.GPIO as GPIO
@@ -12,7 +12,7 @@ class RPILever(LeverBase):
         super().__init__(lever_name)
         self.input_pin = input_pin #pin that reads in if the lever is being pressed
         self.output_pin = output_pin #pin that controls the lever active property
-        GPIO.setmode(GPIO.BCM)  
+        GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.input_pin, GPIO.IN)
         GPIO.setup(self.output_pin, GPIO.OUT)
 
@@ -20,11 +20,10 @@ class RPILever(LeverBase):
         input_pin_val = GPIO.input(self.input_pin)
         self.set_state(input_pin_val)
         #check for state via output pin of lever
-    
     def set_is_active(self, val: bool):
         super().set_is_active(val)
         #Set relay voltage to this
-        if val:
+        if self.active:
             GPIO.output(self.output_pin, 1)
         else:
             GPIO.output(self.output_pin, 0)
@@ -33,13 +32,14 @@ if __name__ == "__main__":
     print("Testing Hardware Lever...")
     import time 
 
-    lever:LeverBase = RPILever("rpi_lever", 23, 24)
-
+    lever:LeverBase = RPILever("rpi_lever", 25, 24)
+    print("Test 0")
+    lever.set_is_active(False)
+    time.sleep(2)
     lever.set_is_active(not lever.active)
     print("Test 1")
     time.sleep(5)
     lever.set_is_active(not lever.active)
     print("Test 2")
-
-
-    
+    while True:
+        lever.update_state_continously()
