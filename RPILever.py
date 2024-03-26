@@ -19,7 +19,7 @@ class RPILever(LeverBase):
 
     def update_state_continously(self) -> None:
         input_pin_val = -1
-        for i in range(len(30)):
+        for i in range(30):
             input_pin_val = GPIO.input(self.input_pin)
         if self.state != input_pin_val:
             print(str(self.stateCount)+") New State: "+str(input_pin_val))
