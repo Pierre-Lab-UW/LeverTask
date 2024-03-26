@@ -42,5 +42,4 @@ if __name__ == "__main__":
     lever.set_is_active(not lever.active)
     print("Test 2")
     while True:
-        print("a")
         lever.update_state_continously()
