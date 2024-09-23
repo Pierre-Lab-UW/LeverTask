@@ -6,7 +6,7 @@ STATE_PRESSED:int = 1
 class LeverBase():
     '''
     The LeverBase class is a specification for a lever and can be inherited to create different implementations. 
-    This class can be inherited and modified to work with different types of levers
+    This class can be inherited and modified to work with different types of levers(eg. switches, retractable)
     
     Args:
         lever_name (str): The name of the lever.

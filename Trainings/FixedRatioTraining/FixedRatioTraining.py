@@ -4,7 +4,7 @@ from LeverBase import STATE_PRESSED, STATE_UNPRESSED
 import time
 
 class LeverPressedEvent(LeverEventBase):
-    def __init__(self,event_name, lever, max_count, rest_interval):
+    def __init__(self,event_name : str, lever : LeverBase, max_count : int, rest_interval: int):
         super().__init__(event_name, lever)
         self.pressed_count  = 0
         self.max_count = max_count
