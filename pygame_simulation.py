@@ -60,6 +60,8 @@ fixed_ratio_training.start_event()
 
 pygame_events = pygame.event.get()
 clock = pygame.time.Clock()
+
+
 while True:
     clock.tick(60)
     pygame_events = pygame.event.get()

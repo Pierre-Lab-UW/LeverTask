@@ -10,6 +10,7 @@ except:
 class RPILever(LeverBase):
     def __init__(self, lever_name: str, input_pin:int, output_pin:int):
         super().__init__(lever_name)
+
         self.input_pin = input_pin #pin that reads in if the lever is being pressed
         self.output_pin = output_pin #pin that controls the lever active property
         GPIO.setmode(GPIO.BCM)  
@@ -33,13 +34,9 @@ if __name__ == "__main__":
     print("Testing Hardware Lever...")
     import time 
 
-    lever:LeverBase = RPILever("rpi_lever", 23, 24)
+    lever_right:LeverBase = RPILever("lever_task", 23, 24)
 
-    lever.set_is_active(not lever.active)
-    print("Test 1")
-    time.sleep(5)
-    lever.set_is_active(not lever.active)
-    print("Test 2")
+
 
 
     
