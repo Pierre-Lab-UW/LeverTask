@@ -139,7 +139,7 @@ class GO_NO_GO(object):
                     break
 
             self.current_trial += 1
-            pg.time.delay(self.inter_trial_interval )
+            pg.time.delay(int(self.inter_trial_interval.iloc[0]))
 
         print("All trials completed.")
 
