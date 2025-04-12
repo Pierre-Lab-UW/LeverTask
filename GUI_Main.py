@@ -1,10 +1,17 @@
+import os
 import sys
 
+
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QApplication, QWidget, QScrollArea, QVBoxLayout, QPushButton, QLabel, QHBoxLayout, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QScrollArea, QVBoxLayout, QPushButton, QLabel, QHBoxLayout, \
+    QLineEdit, QFileDialog
+from PyQt5.QtGui import QIcon
+
 
 
 class MainWindow(QWidget):
+
+
 
     def __init__(self):
         super().__init__()
@@ -27,6 +34,8 @@ class MainWindow(QWidget):
         # Create a QWidget for your contents
         content = QWidget()
         scroll.setWidget(content)
+
+        self.filename = None
 
         # Layout for the contents inside the scroll area
         layout = QVBoxLayout(content)
@@ -55,22 +64,40 @@ class MainWindow(QWidget):
         layout.addWidget(button)
         button.clicked.connect(self.on_click)  # Connect the button's clicked signal to the on_click slot
 
+        button = QPushButton("OpenFile")
+        layout.addWidget(button)
+        button.clicked.connect(self.openFileNameDialog)  # Connect the button's clicked signal to the on_click slot
+
+
+
+
     # saves to the LeverParameter File
     @pyqtSlot()
     def on_click(self):
 
-        filename = "Lever_params.csv"
-        print("levers")
+      if os.path.exists(self.filename):
+          # Collect data from input fields
+          written_result: str = ""
+          for p, text_input in self.input_fields.items():
+              written_result += text_input.text() + ","
 
-        written_result = ""
+          # Remove the last comma to avoid an extra column in CSV
+          written_result = written_result.rstrip(',')
 
-        for p, text_input in self.input_fields.items():
-            written_result += text_input.text() + ","
+          # Append data to the file with a newline to ensure it starts on a new line
+          with open(self.filename, "a") as file:
+            file.write(written_result + "\n")
+            print(written_result)
 
-        print(written_result)
 
-        with open(filename, "w") as file:
-            filename.writeln(str(written_result))
+    def openFileNameDialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "CSV Files (*.csv)")
+        print(file_path) # test if its working
+
+
+
 
 
 if __name__ == '__main__':
