@@ -60,10 +60,10 @@ except:
     system_name = TODAY
 
 
-# LOAD SOUNDS
+# LOAD SOUNDS,modified by ishaan to accomodate directory leel changes
 # #
 sounds = {}
-for sound in glob.glob(os.path.join(r'_modules/_sounds', '*.wav')):
+for sound in glob.glob(os.path.join(r'_sounds', '*.wav')):
     sounds[os.path.basename(sound).replace('.wav', '')] = pg.mixer.Sound(sound)
     sounds[os.path.basename(sound).replace('.wav', '')].set_volume(1)
 

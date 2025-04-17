@@ -1,1 +1,2 @@
-subject,ITI,NG_DELAY_PERIOD,RatioTrials,Reward,AbortTrialTime
+subject,ITI,NG_DELAY_PERIOD,RatioTrials,Reward,AbortTrialTime,NumTrials
+AlanSorenson,5,3,0.7,6,7,10
