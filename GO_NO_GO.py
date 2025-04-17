@@ -158,6 +158,7 @@ class GO_NO_GO(object):
                 return 'success'
             elif result == 'Running':
                 print(f'Still Running (Time={self.time})')
+
             elif result == 'timeout':
                 print("Timeout occurred")
                 sounds['incorrect'].play()
@@ -175,6 +176,13 @@ if __name__ == "__main__":
         result = gng.run()  # run trials
         gng.current_trial += 1
         gng.stop_updating()  # stop updating timer
+
+
+
         pg.time.delay(int(gng.inter_trial_interval) * 1000)  # delay by inter trial interval
+
+        gng.shape_pos_x = gng.width / 2
+        gng.shape_pos_y = gng.height / 2
+        pg.mouse.set_pos((gng.shape_pos_x, gng.shape_pos_y))
 
     print("All trials completed.")
