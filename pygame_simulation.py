@@ -20,8 +20,6 @@ class PyGameLever(LeverBase):
         self.height = height
     
     def update_state_continously(self):
-        if pygame_events == None or not self.active:
-            return
         for event in pygame_events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x_pos, y_pos = pygame.mouse.get_pos()
@@ -34,8 +32,6 @@ class PyGameLever(LeverBase):
                 self.set_state(STATE_UNPRESSED)   
                      
     def draw(self):
-        if not self.active:
-            return
         if self.state == STATE_UNPRESSED:
             pygame.draw.rect(window, (255,0,0), [self.x,self.y,self.width,self.height],0)
         else:

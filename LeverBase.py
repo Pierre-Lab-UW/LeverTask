@@ -57,7 +57,8 @@ class LeverBase():
         and runs a update callback function for all the events the lever is subscribed to. 
         Don't forget to call super().update() first when overriding this method.
         """
-        self.update_state_continously()
+        if self.active:
+            self.update_state_continously()
         for ev in self.events:
             ev.on_lever_update()
     
@@ -74,17 +75,17 @@ class LeverBase():
             raise Exception("{event} must be a LeverEventBase!")
         if event in self.events:
             raise Exception(event.name + " is already in the events for this lever!")
-        #TODO:check for duplicate events
+        #TODO:check for duplicate events, use a hashmap.
         self.events.append(event)
             
     def set_is_active(self, val: bool):
         """
-        Sets if the lever is currently avaliable to be pressed. 
+        Sets if the lever should process events when it is being pressed. 
 
         Parameters
         ----------
         val : bool 
-            A boolean representing if the lever can be pressed or not.
+            A boolean representing if the lever should process events when it is being pressed.
         """
         self.active = val
     
