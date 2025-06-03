@@ -1,5 +1,5 @@
 from LeverBase import LeverBase
-
+from typing import Dict
 
 class Training:
     '''
@@ -16,7 +16,7 @@ class Training:
     def __init__(self, lever1:LeverBase, lever2:LeverBase, params:dict[str, int] = {}):
         self.lever1:LeverBase = lever1
         self.lever2:LeverBase = lever2
-        self.params:dict[str, int] = params
+        self.params:Dict[str, int] = params
         pass
     
     def start_event(self):

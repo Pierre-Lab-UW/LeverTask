@@ -1,4 +1,5 @@
 from LeverEventBase import LeverEventBase
+from typing import List
 
 STATE_UNPRESSED:int = 0
 STATE_PRESSED:int = 1
@@ -18,7 +19,7 @@ class LeverBase():
         active (bool): Stores if the lever can be pressed or not
     '''
     def __init__(self,lever_name: str):
-        self.events: list[LeverEventBase] = []
+        self.events: List[LeverEventBase] = []
         #0 means lever isn't pressed, 1 means it has been pressed
         self.state:int = STATE_UNPRESSED
         self.name:str = lever_name
