@@ -67,5 +67,6 @@ while True:
     window.fill([255,255,255])
     lever_pygame_1.update()
     lever_pygame_2.update()
+    fixed_ratio_training.update()
     pygame.display.update()
 

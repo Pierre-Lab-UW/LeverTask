@@ -46,5 +46,6 @@ class Training:
             raise Exception("Param "+str(param_name)+" not found in the dict!")
         return self.params[param_name]
     
-    
-    
+    def update(self):
+        """Called in a while loop. Should be overidden."""
+        pass
