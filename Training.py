@@ -13,7 +13,7 @@ class Training:
         Lever1 (LeverBase): The first lever being used.
         Lever2 (LeverBase) The second lever being used..
     '''
-    def __init__(self, lever1:LeverBase, lever2:LeverBase, params:dict[str, int] = {}):
+    def __init__(self, lever1:LeverBase, lever2:LeverBase, params:Dict[str, int] = {}):
         self.lever1:LeverBase = lever1
         self.lever2:LeverBase = lever2
         self.params:Dict[str, int] = params
