@@ -5,7 +5,7 @@ from typing import Callable, Optional, Dict
 
 
 
-class LeverPressedEvent(LeverEventBase):
+class LeverStateChangedEvent(LeverEventBase):
     def __init__(
         self,
         event_name: str,
@@ -16,5 +16,5 @@ class LeverPressedEvent(LeverEventBase):
         self.callback_fn: Optional[Callable[[LeverBase], None]] = callback_fn
 
     def on_lever_state_change(self, new_lever_state: int) -> None:
-        if new_lever_state == STATE_PRESSED and self.callback_fn:
-            self.callback_fn(self.lever)
+        if self.callback_fn:
+            self.callback_fn(self.lever, new_lever_state)

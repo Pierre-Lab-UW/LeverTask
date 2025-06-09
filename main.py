@@ -12,7 +12,7 @@ lever_2:RPILever = RPILever("rpi_2_lever", 15)
 lever_1.add_event(DebugEvent("debug", lever_1))
 lever_2.add_event(DebugEvent("debug", lever_2))
 #start a fixed ratio training
-fixed_ratio_parameters: Dict[str, int] = {"lever_presses":5, "update_interval":3}
+fixed_ratio_parameters: Dict[str, int] = {"FR":5, "ITI":3, "PRP":5}
 fixed_ratio_training: Training = FixedRatioTraining(lever_1 , lever_2, fixed_ratio_parameters)
 fixed_ratio_training.start_event()
 

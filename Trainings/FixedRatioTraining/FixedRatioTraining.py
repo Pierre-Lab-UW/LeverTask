@@ -1,9 +1,11 @@
 from typing import Callable, Optional, Dict
-from Events.LeverPressedEvent import LeverPressedEvent
+from Events.LeverStateChangedEvent import LeverStateChangedEvent
 from Training import Training
 import time
 from LeverBase import LeverBase, STATE_PRESSED
-
+import csv
+from datetime import datetime
+import os
 
 class FixedRatioTraining(Training):
     def __init__(
@@ -17,31 +19,119 @@ class FixedRatioTraining(Training):
             self.lever1.name: 0,
             self.lever2.name: 0
         }
-        self.last_reset_times: Dict[str, float] = {
-            self.lever1.name: 0.0,
-            self.lever2.name: 0.0
-        }
 
-    def _on_lever_pressed(self, lever: LeverBase):
+        self.durations: Dict[str, int] = {
+            self.lever1.name: 0,
+            self.lever2.name: 0
+        }
+        
+        self.lever1_cur_data: list[any] = []
+        self.lever2_cur_data: list[any] = []
+
+        self.last_reset_time: int = 0
+        self.output_data_file = ""
+        self.create_timestamped_csv()
+        self.start_time = 0
+
+    def create_timestamped_csv(self):
+
+        if not os.path.exists("OutputData"):
+    
+            # if the demo_folder directory is not present 
+            # then create it.
+            os.makedirs("OutputData")
+
+
+        header=["Response (LP cumulative)","Lever Name", "Duration", "IRT", "Cumulative time from start", "TO interval", "ITI", "Rewarded (0/1)", "Schedule"]
+        # Get current time down to the second
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"OutputData/FR{self.get_param("FR")}_data_{timestamp}.csv"
+        self.output_data_file = filename
+        # Write data to CSV
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            if header:
+                writer.writerow(header)
+
+        print(f"CSV file '{filename}' created successfully.")
+
+    def write_row_with_index(self, filename, row_data):
+        index = 0
+        file_exists = os.path.exists(filename)
+
+        if file_exists:
+            with open(filename, 'r', newline='') as f:
+                index = sum(1 for _ in f) - 1  # header row doesn't count
+
+        with open(filename, 'a', newline='') as f:
+            writer = csv.writer(f)
+            if not file_exists or os.stat(filename).st_size == 0:
+                raise Exception("Invalid file name!")
+
+            # Insert index into the first column ("Response (LP cumulative)")
+            row_with_index = [index] + row_data
+            writer.writerow(row_with_index)
+
+
+    def _on_lever_state_changed(self, lever: LeverBase, new_state: int):
         if not lever.active:
             return
+        if new_state == 1:        
+            self.press_counts[lever.name] += 1
+            #record data
+            cur_duration:int = time.time() - self.durations[lever.name]
+            row = [lever.name, -1, cur_duration, time.time() - self.start_time, 0, self.get_param("ITI"), 0, self.get_param("FR")]
+            if self.durations[lever.name] == 0:
+                row[2] = "-"
 
-        self.press_counts[lever.name] += 1
-        print(f"{lever.name} Count: {self.press_counts[lever.name]}")
+            
 
-        if self.press_counts[lever.name] >= self.get_param("lever_presses"):
-            print("Pellet dispense!")
-            self.press_counts[lever.name] = 0
-            lever.set_is_active(False)
-            self.last_reset_times[lever.name] = time.time()
+            if self.lever1.name == lever.name:
+                self.lever1_cur_data = row
+            elif self.lever2.name == lever.name:
+                self.lever2_cur_data = row
+            else:
+                raise Exception("Lever name doesn't match!")
+
+            self.durations[lever.name] = time.time()
+            
+            print(f"{lever.name} Count: {self.press_counts[lever.name]}")
+            
+        else:
+            #record button press data
+            cur_time:float = time.time()
+            button_pressed_dur: int =  cur_time - self.durations[lever.name]
+            reward_flag = 0
+
+            if self.press_counts[lever.name] >= self.get_param("FR"):
+                print("Cooldown!")
+                self.press_counts[lever.name] = 0
+                self.lever1.set_is_active(False)
+                self.lever2.set_is_active(False)
+                self.last_reset_time = time.time()
+                reward_flag = 1
+
+            if lever.name == self.lever1.name:
+                self.lever1_cur_data[1] = button_pressed_dur
+                self.lever1_cur_data[-1] = reward_flag
+                self.write_row_with_index(self.output_data_file, self.lever1_cur_data)
+            elif self.lever2.name == lever.name:
+                self.lever2_cur_data[1] = button_pressed_dur
+                self.write_row_with_index(self.output_data_file, self.lever2_cur_data)
+                self.lever2_cur_data[-1] = reward_flag
+            else:
+                raise Exception("Lever name doesn't match!")
+
+            
 
     def start_event(self):
         self.lever1.add_event(
-            LeverPressedEvent("lever1_press", self.lever1, self._on_lever_pressed)
+            LeverStateChangedEvent("lever1_press", self.lever1, self._on_lever_state_changed)
         )
         self.lever2.add_event(
-            LeverPressedEvent("lever2_press", self.lever2, self._on_lever_pressed)
+            LeverStateChangedEvent("lever2_press", self.lever2, self._on_lever_state_changed)
         )
+        self.start_time = time.time()
 
     def stop_event(self):
         self.lever1.events.clear()
@@ -49,11 +139,13 @@ class FixedRatioTraining(Training):
 
     def update(self):
         now: float = time.time()
-        for lever in [self.lever1, self.lever2]:
-            if not lever.active:
-                elapsed: float = now - self.last_reset_times[lever.name]
-                if elapsed > self.get_param("update_interval"):
-                    lever.set_is_active(True)
+        if not self.lever1.active and not self.lever2.active:
+            elapsed: float = now - self.last_reset_time
+            if elapsed > self.get_param("PRP"):
+                print("Resume!")
+                self.lever1.set_is_active(True)
+                self.lever2.set_is_active(True)
+
 
         
     
