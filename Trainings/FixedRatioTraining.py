@@ -31,7 +31,7 @@ class FixedRatioTraining(Training):
         self.last_reset_time: int = 0
         self.current_ratio = self.get_param("FR")
 
-        self.output_data_file = f"OutputData/FR{self.current_ratio}_data_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
+        self.output_data_file = f"OutputData/FR{self.current_ratio}_data_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
         self.start_time = 0
 
         self.ITI = self.get_param("ITI")
