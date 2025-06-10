@@ -27,13 +27,14 @@ class ProgressiveRatioTraining(FixedRatioTraining):
                 self.lever2.set_is_active(True)
                 self.current_ratio += self.progressive_ratio
         else:
+            #timeout logic - program will only timeout if any lever hasn't been pressed in the past [Timeout] seconds
+            #will not timeout if monkey is holding lever for an extended amount of time, also the ITI cooldown is not counted in the timeout
             flag = True
-            for key in self.durations:
-                print(self.durations[key])
-                if now - self.start_time - self.durations[key] <= self.timeout_time:
-                    flag = False
-                    break
-            self.should_end = flag
+            print(now - self.last_lever_press_time)
+            if now - self.last_lever_press_time <= self.timeout_time:
+                flag = False
+            if self.lever1.get_state() != 1 and self.lever2.get_state() != 1:
+                self.should_end = flag
                 
 
 

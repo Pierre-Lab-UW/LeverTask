@@ -37,6 +37,7 @@ class FixedRatioTraining(Training):
         self.ITI = self.get_param("ITI")
         self.timeout_time = self.get_param("Timeout")
         self.should_end = False
+        self.last_lever_press_time: float = time.time()
 
     def create_timestamped_csv(self):
 
@@ -78,7 +79,8 @@ class FixedRatioTraining(Training):
     def _on_lever_state_changed(self, lever: LeverBase, new_state: int):
         if not lever.active:
             return
-        if new_state == 1:        
+        if new_state == 1:
+            self.last_lever_press_time = time.time()        
             self.press_counts[lever.name] += 1
             #record data
             cur_duration:int = time.time() - self.durations[lever.name]
@@ -100,6 +102,7 @@ class FixedRatioTraining(Training):
             print(f"{lever.name} Count: {self.press_counts[lever.name]}")
             
         else:
+            self.last_lever_press_time = time.time()        
             #record button press data
             cur_time:float = time.time()
             button_pressed_dur: int =  cur_time - self.durations[lever.name]
@@ -147,13 +150,16 @@ class FixedRatioTraining(Training):
             if elapsed > self.ITI:
                 self.lever1.set_is_active(True)
                 self.lever2.set_is_active(True)
+                self.last_lever_press_time = time.time()
         else:
+            #timeout logic - program will only timeout if any lever hasn't been pressed in the past [Timeout] seconds
+            #will not timeout if monkey is holding lever for an extended amount of time, also the ITI cooldown is not counted in the timeout
             flag = True
-            for key in self.durations:
-                if now - self.start_time - self.durations[key] <= self.timeout_time:
-                    flag = False
-                    break
-            self.should_end = flag
+            print(now - self.last_lever_press_time)
+            if now - self.last_lever_press_time <= self.timeout_time:
+                flag = False
+            if self.lever1.get_state() != 1 and self.lever2.get_state() != 1:
+                self.should_end = flag
                 
 
     def should_end_traning(self) -> bool:
