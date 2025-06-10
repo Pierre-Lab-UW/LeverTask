@@ -1,10 +1,13 @@
+from typing import Dict
 import pygame,sys
 from pygame.locals import *
 from LeverBase import *
 from LeverEventBase import LeverEventBase, DebugEvent
 from Events.RecordDataEvent import *
-from Trainings.FixedRatioTraining.FixedRatioTraining import *
+from Trainings import *
 from RPILever import RPILever
+from Trainings.ProgressiveRatioTraining import ProgressiveRatioTraining
+from Trainings.FixedRatioTraining import FixedRatioTraining
 pygame.init()
 
 window = pygame.display.set_mode((600,600))
@@ -50,8 +53,8 @@ lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
 lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
 lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
 #start a fixed ratio training
-fixed_ratio_parameters = {"lever_presses":5, "update_interval":3}
-fixed_ratio_training = FixedRatioTraining(lever_pygame_1 , lever_pygame_2, fixed_ratio_parameters)
+fixed_ratio_parameters: Dict[str, int] = {"FR":5, "ITI":3, "PR":1, "Timeout":10}
+fixed_ratio_training = ProgressiveRatioTraining(lever_pygame_1 , lever_pygame_2, fixed_ratio_parameters)
 fixed_ratio_training.start_event()
 
 pygame_events = pygame.event.get()
@@ -60,7 +63,7 @@ while True:
     clock.tick(60)
     pygame_events = pygame.event.get()
     for event in pygame_events:
-        if event.type == QUIT:
+        if event.type == QUIT or fixed_ratio_training.should_end_traning():
             fixed_ratio_training.stop_event()
             pygame.quit()
             sys.exit(0)

@@ -49,3 +49,11 @@ class Training:
     def update(self):
         """Called in a while loop. Should be overidden."""
         pass
+
+    def should_end_traning(self) -> bool:
+        '''Signals if the program should end or not. Checked in the main loop.
+           
+           Returns:
+                Whether or not the program should end.
+        '''
+        return False
