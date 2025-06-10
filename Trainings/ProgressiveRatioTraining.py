@@ -29,8 +29,10 @@ class ProgressiveRatioTraining(FixedRatioTraining):
         else:
             flag = True
             for key in self.durations:
-                if now - self.durations[key] <= self.timeout_time:
+                print(self.durations[key])
+                if now - self.start_time - self.durations[key] <= self.timeout_time:
                     flag = False
+                    break
             self.should_end = flag
                 
 

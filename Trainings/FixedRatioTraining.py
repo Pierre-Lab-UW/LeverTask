@@ -142,7 +142,6 @@ class FixedRatioTraining(Training):
 
     def update(self):
         now: float = time.time()
-        
         if not self.lever1.active and not self.lever2.active:
             elapsed: float = now - self.last_reset_time
             if elapsed > self.ITI:
@@ -151,12 +150,15 @@ class FixedRatioTraining(Training):
         else:
             flag = True
             for key in self.durations:
-                if now - self.durations[key] <= self.timeout_time:
+                if now - self.start_time - self.durations[key] <= self.timeout_time:
                     flag = False
+                    break
             self.should_end = flag
                 
 
     def should_end_traning(self) -> bool:
+        if self.should_end:
+            print("Timed out!")
         return self.should_end
         
     
