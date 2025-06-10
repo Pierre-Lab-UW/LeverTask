@@ -15,7 +15,9 @@ class ProgressiveRatioTraining(FixedRatioTraining):
         super().__init__(lever1, lever2, params)
 
         self.progressive_ratio = self.get_param("PR")
-        self.output_data_file = f"OutputData/PR{self.progressive_ratio}_data_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
+        self.output_data_file = "OutputData/PR{}_data_{}.csv".format(
+            self.current_ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            )
 
     def update(self):
         now: float = time.time()
