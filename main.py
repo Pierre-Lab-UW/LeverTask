@@ -2,7 +2,7 @@ from typing import Dict
 from LeverEventBase import DebugEvent
 from RPILever import RPILever
 from Training import Training
-from Trainings.FixedRatioTraining.FixedRatioTraining import FixedRatioTraining
+from Trainings.FixedRatioTraining import FixedRatioTraining
 
 
 lever_1:RPILever = RPILever("rpi_1_lever", 14)

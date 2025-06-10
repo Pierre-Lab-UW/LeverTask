@@ -29,9 +29,14 @@ class FixedRatioTraining(Training):
         self.lever2_cur_data: list[any] = []
 
         self.last_reset_time: int = 0
-        self.output_data_file = ""
-        self.create_timestamped_csv()
+        self.current_ratio = self.get_param("FR")
+
+        self.output_data_file = f"OutputData/FR{self.current_ratio}_data_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv"
         self.start_time = 0
+
+        self.ITI = self.get_param("ITI")
+        self.timeout_time = self.get_param("Timeout")
+        self.should_end = False
 
     def create_timestamped_csv(self):
 
@@ -44,16 +49,13 @@ class FixedRatioTraining(Training):
 
         header=["Response (LP cumulative)","Lever Name", "Duration", "IRT", "Cumulative time from start", "TO interval", "ITI", "Rewarded (0/1)", "Schedule"]
         # Get current time down to the second
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        filename = f"OutputData/FR{self.get_param("FR")}_data_{timestamp}.csv"
-        self.output_data_file = filename
         # Write data to CSV
-        with open(filename, mode='w', newline='') as file:
+        with open(self.output_data_file, mode='w', newline='') as file:
             writer = csv.writer(file)
             if header:
                 writer.writerow(header)
 
-        print(f"CSV file '{filename}' created successfully.")
+        print(f"CSV file '{self.output_data_file}' created successfully.")
 
     def write_row_with_index(self, filename, row_data):
         index = 0
@@ -80,7 +82,7 @@ class FixedRatioTraining(Training):
             self.press_counts[lever.name] += 1
             #record data
             cur_duration:int = time.time() - self.durations[lever.name]
-            row = [lever.name, -1, cur_duration, time.time() - self.start_time, 0, self.get_param("ITI"), 0, self.get_param("FR")]
+            row = [lever.name, -1, cur_duration, time.time() - self.start_time, 0, self.ITI, 0, self.current_ratio]
             if self.durations[lever.name] == 0:
                 row[2] = "-"
 
@@ -103,7 +105,7 @@ class FixedRatioTraining(Training):
             button_pressed_dur: int =  cur_time - self.durations[lever.name]
             reward_flag = 0
 
-            if self.press_counts[lever.name] >= self.get_param("FR"):
+            if self.press_counts[lever.name] >= self.current_ratio:
                 print("Cooldown!")
                 self.press_counts[lever.name] = 0
                 self.lever1.set_is_active(False)
@@ -125,6 +127,7 @@ class FixedRatioTraining(Training):
             
 
     def start_event(self):
+        self.create_timestamped_csv()
         self.lever1.add_event(
             LeverStateChangedEvent("lever1_press", self.lever1, self._on_lever_state_changed)
         )
@@ -139,13 +142,22 @@ class FixedRatioTraining(Training):
 
     def update(self):
         now: float = time.time()
+        
         if not self.lever1.active and not self.lever2.active:
             elapsed: float = now - self.last_reset_time
-            if elapsed > self.get_param("ITI"):
+            if elapsed > self.ITI:
                 self.lever1.set_is_active(True)
                 self.lever2.set_is_active(True)
+        else:
+            flag = True
+            for key in self.durations:
+                if now - self.durations[key] <= self.timeout_time:
+                    flag = False
+            self.should_end = flag
+                
 
-
+    def should_end_traning(self) -> bool:
+        return self.should_end
         
     
     
