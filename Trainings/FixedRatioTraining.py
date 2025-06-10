@@ -153,6 +153,7 @@ class FixedRatioTraining(Training):
                 self.lever1.set_is_active(True)
                 self.lever2.set_is_active(True)
                 self.last_lever_press_time = time.time()
+                print("Resume")
         else:
             #timeout logic - program will only timeout if any lever hasn't been pressed in the past [Timeout] seconds
             #will not timeout if monkey is holding lever for an extended amount of time, also the ITI cooldown is not counted in the timeout
