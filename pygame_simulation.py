@@ -50,7 +50,7 @@ lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
 lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
 lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
 #start a fixed ratio training
-fixed_ratio_parameters: Dict[str, int] = {"FR":5, "ITI":3, "PRP":5}
+fixed_ratio_parameters: Dict[str, int] = {"FR":5, "ITI":3}
 fixed_ratio_training = FixedRatioTraining(lever_pygame_1 , lever_pygame_2, fixed_ratio_parameters)
 fixed_ratio_training.start_event()
 

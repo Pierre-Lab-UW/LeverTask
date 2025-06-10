@@ -113,12 +113,12 @@ class FixedRatioTraining(Training):
 
             if lever.name == self.lever1.name:
                 self.lever1_cur_data[1] = button_pressed_dur
-                self.lever1_cur_data[-1] = reward_flag
+                self.lever1_cur_data[-2] = reward_flag
                 self.write_row_with_index(self.output_data_file, self.lever1_cur_data)
             elif self.lever2.name == lever.name:
                 self.lever2_cur_data[1] = button_pressed_dur
+                self.lever2_cur_data[-2] = reward_flag
                 self.write_row_with_index(self.output_data_file, self.lever2_cur_data)
-                self.lever2_cur_data[-1] = reward_flag
             else:
                 raise Exception("Lever name doesn't match!")
 
@@ -141,8 +141,7 @@ class FixedRatioTraining(Training):
         now: float = time.time()
         if not self.lever1.active and not self.lever2.active:
             elapsed: float = now - self.last_reset_time
-            if elapsed > self.get_param("PRP"):
-                print("Resume!")
+            if elapsed > self.get_param("ITI"):
                 self.lever1.set_is_active(True)
                 self.lever2.set_is_active(True)
 
