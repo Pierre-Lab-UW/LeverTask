@@ -1,13 +1,13 @@
 from typing import Dict
+import LeverBase
 from LeverEventBase import DebugEvent
-from RPILever import RPILever
+from SwitchLever import SwitchLever
 from Training import Training
 from Trainings.FixedRatioTraining import FixedRatioTraining
 from Trainings.ProgressiveRatioTraining import ProgressiveRatioTraining
 
-
-lever_1:RPILever = RPILever("rpi_1_lever", 14)
-lever_2:RPILever = RPILever("rpi_2_lever", 15)
+lever_1:LeverBase = SwitchLever("rpi_1_lever", 0)
+lever_2:LeverBase = SwitchLever("rpi_2_lever", 3)
 
 #add a debug event for helful logging
 lever_1.add_event(DebugEvent("debug", lever_1))
