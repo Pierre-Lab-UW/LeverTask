@@ -6,6 +6,7 @@ from LeverBase import LeverBase, STATE_PRESSED
 import csv
 from datetime import datetime
 import os
+from ADU200 import ADU200
 
 class FixedRatioTraining(Training):
     def __init__(
@@ -29,17 +30,19 @@ class FixedRatioTraining(Training):
         self.lever2_cur_data: list[any] = []
 
         self.last_reset_time: int = 0
-        self.current_ratio = self.get_param("FR")
+        self.current_ratio: int = self.get_param("FR")
 
-        self.output_data_file = "OutputData/FR{}_data_{}.csv".format(
+        self.output_data_file: str = "OutputData/FR{}_data_{}.csv".format(
             self.current_ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             )
-        self.start_time = 0
+        self.start_time: int = 0
 
-        self.ITI = self.get_param("ITI")
-        self.timeout_time = self.get_param("Timeout")
-        self.should_end = False
+        self.ITI: int = self.get_param("ITI")
+        self.timeout_time: int = self.get_param("Timeout")
+        self.should_end: bool = False
         self.last_lever_press_time: float = time.time()
+        ADU200.get_instance().set_relay(0, False)
+
 
     def create_timestamped_csv(self):
 
@@ -103,7 +106,7 @@ class FixedRatioTraining(Training):
             
             print(f"{lever.name} Count: {self.press_counts[lever.name]}")
             
-        else:
+        elif new_state == 0:
             self.last_lever_press_time = time.time()        
             #record button press data
             cur_time:float = time.time()
@@ -117,12 +120,18 @@ class FixedRatioTraining(Training):
                 self.lever2.set_is_active(False)
                 self.last_reset_time = time.time()
                 reward_flag = 1
+                ADU200.get_instance().set_relay(0, True)
 
-            if lever.name == self.lever1.name:
+            if lever.name == self.lever1.name: 
+                if len(self.lever1_cur_data) > 0:
+                    return
+                print(self.lever1_cur_data)
                 self.lever1_cur_data[1] = button_pressed_dur
                 self.lever1_cur_data[-2] = reward_flag
                 self.write_row_with_index(self.output_data_file, self.lever1_cur_data)
             elif self.lever2.name == lever.name:
+                if len(self.lever1_cur_data) > 0:
+                    return
                 self.lever2_cur_data[1] = button_pressed_dur
                 self.lever2_cur_data[-2] = reward_flag
                 self.write_row_with_index(self.output_data_file, self.lever2_cur_data)
@@ -153,6 +162,7 @@ class FixedRatioTraining(Training):
                 self.lever1.set_is_active(True)
                 self.lever2.set_is_active(True)
                 self.last_lever_press_time = time.time()
+                ADU200.get_instance().set_relay(0, False)
                 print("Resume")
         else:
             #timeout logic - program will only timeout if any lever hasn't been pressed in the past [Timeout] seconds
@@ -163,6 +173,7 @@ class FixedRatioTraining(Training):
             if self.lever1.get_state() != 1 and self.lever2.get_state() != 1:
                 self.should_end = flag
                 
+    
 
     def should_end_traning(self) -> bool:
         if self.should_end:

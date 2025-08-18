@@ -48,6 +48,12 @@ class ADU200:
         except IOError as e:
             print(f'Error writing command: {e}')
             return None
+    
+    def set_relay(self, relay_num, set_open=True):
+        if set_open:
+            self.write('RK'+str(relay_num))
+        else:
+            self.write('SK'+str(relay_num))
 
     def read(self, timeout: int = 200) -> Optional[str]:
         if not self.device:
@@ -84,3 +90,23 @@ class ADU200:
         for d in hid.enumerate(vendor_id):
             print(f'    Product ID: {d["product_id"]}')
         print()
+
+
+if __name__ == "__main__":
+    import time
+
+    adu = ADU200.get_instance()
+
+    try:
+        for i in range(5):
+            print(f"Cycle {i+1}: Turning relay 0 ON")
+            adu.set_relay(0, set_open=False)
+            #adu.set_relay(1, set_open=False)
+            time.sleep(2)
+
+            print(f"Cycle {i+1}: Turning relay 0 OFF")
+            adu.set_relay(0, set_open=True)
+            #adu.set_relay(1, set_open=True)
+            time.sleep(2)
+    finally:
+        adu.disconnect()

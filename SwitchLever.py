@@ -7,10 +7,13 @@ class SwitchLever(LeverBase):
         self.relay_pin = relay_pin #pin that reads in if the lever is being pressed
 
     def update_state_continously(self) -> None:
-        new_state: int = ADU200.get_instance().get_port_status(self.relay_pin)
-        if new_state != self.state:
-            print(self.name+" State: "+str(new_state))
-        self.set_state(new_state)
+        try:
+            new_state: int = ADU200.get_instance().get_port_status(self.relay_pin)
+            if new_state != self.state and new_state != None:
+                print(self.name+" State: "+str(new_state))
+                self.set_state(new_state)
+        except Exception as e:
+            raise Exception("Error when trying to read lever state from ADU200: {}".format(e))
         #check for state via output pin of lever
     def set_is_active(self, val: bool):
         super().set_is_active(val)
