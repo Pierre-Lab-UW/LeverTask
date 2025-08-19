@@ -5,7 +5,6 @@ from LeverBase import *
 from LeverEventBase import LeverEventBase, DebugEvent
 from Events.RecordDataEvent import *
 from Trainings import *
-from RPILever import RPILever
 from Trainings.RatioTraining import RatioTraining
 pygame.init()
 
