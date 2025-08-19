@@ -5,7 +5,7 @@ from LeverBase import *
 from LeverEventBase import LeverEventBase, DebugEvent
 from Events.RecordDataEvent import *
 from Trainings import *
-from Trainings.RatioTraining import RatioTraining
+import importlib
 pygame.init()
 
 window = pygame.display.set_mode((600,600))
@@ -45,15 +45,28 @@ class PyGameLever(LeverBase):
 
 
 
+
+# Command line arguments: training class name, parameter file
+if len(sys.argv) < 3:
+    print("Usage: python pygame_simulation.py <TrainingClassName> <ParameterFile>")
+    sys.exit(1)
+
+training_class_name = sys.argv[1]
+param_file = sys.argv[2]
+
 lever_pygame_1 = PyGameLever("Lever1",  100, 350, 100, 100)
 lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
 
-#add a debug event for helful logging
-lever_pygame_1.add_event(DebugEvent("debug", lever_pygame_1))
-lever_pygame_2.add_event(DebugEvent("debug", lever_pygame_2))
-#start a fixed ratio training
-ratio_training = RatioTraining(lever_pygame_1 , lever_pygame_2, "Trainings/RatioTraining.yaml")
-ratio_training.start_event()
+# Dynamically import the training class
+try:
+    training_module = importlib.import_module(f"Trainings.{training_class_name}")
+    TrainingClass = getattr(training_module, training_class_name)
+except (ModuleNotFoundError, AttributeError):
+    print(f"Could not find training class '{training_class_name}' in Trainings/{training_class_name}.py")
+    sys.exit(1)
+
+training_instance = TrainingClass(lever_pygame_1, lever_pygame_2, param_file)
+training_instance.start_event()
 
 pygame_events = pygame.event.get()
 clock = pygame.time.Clock()
@@ -61,13 +74,13 @@ while True:
     clock.tick(60)
     pygame_events = pygame.event.get()
     for event in pygame_events:
-        if event.type == QUIT or ratio_training.should_end_traning():
-            ratio_training.stop_event()
+        if event.type == QUIT or training_instance.should_end_traning():
+            training_instance.stop_event()
             pygame.quit()
             sys.exit(0)
     window.fill([255,255,255])
     lever_pygame_1.update()
     lever_pygame_2.update()
-    ratio_training.update()
+    training_instance.update()
     pygame.display.update()
 

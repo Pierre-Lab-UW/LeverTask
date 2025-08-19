@@ -1,0 +1,18 @@
+# Parameters for PatternMimicTraining
+parameters:
+  TaskName:
+    type: str
+    default: PatternMimicTraining
+    actual: PatternMimicTraining
+  PatternLength:
+    type: int
+    default: 5
+    actual: 5
+  Timeout:
+    type: int
+    default: 10
+    actual: 10
+  DisplayTime:
+    type: float
+    default: 2
+    actual: 2
