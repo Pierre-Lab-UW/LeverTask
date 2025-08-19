@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TRAININGS_DIR = ROOT / 'Trainings'
 PYGAME_SCRIPT = ROOT / 'pygame_simulation.py'
+MAIN_SCRIPT = ROOT / 'main.py'
 
 class TrainingGUI(tk.Tk):
     def __init__(self):
@@ -46,9 +47,17 @@ class TrainingGUI(tk.Tk):
         self.lever2_entry = ttk.Entry(container, textvariable=self.lever2_var, width=30)
         self.lever2_entry.grid(row=3, column=1, sticky='w', padx=8, pady=4)
 
+        # Runner selection (pygame_simulation.py or main.py)
+        ttk.Label(container, text='Runner:').grid(row=4, column=0, sticky='e')
+        self.runner_var = tk.StringVar(value='pygame')
+        runner_frame = ttk.Frame(container)
+        runner_frame.grid(row=4, column=1, sticky='w', padx=8, pady=4)
+        ttk.Radiobutton(runner_frame, text='Pygame', value='pygame', variable=self.runner_var).pack(side='left')
+        ttk.Radiobutton(runner_frame, text='Main', value='main', variable=self.runner_var).pack(side='left')
+
         # Buttons
         btn_frame = ttk.Frame(container)
-        btn_frame.grid(row=4, column=0, columnspan=2, pady=8)
+        btn_frame.grid(row=6, column=0, columnspan=2, pady=8)
         self.save_btn = ttk.Button(btn_frame, text='Save Params', command=self.save_params)
         self.save_btn.grid(row=0, column=0, padx=6)
         self.start_btn = ttk.Button(btn_frame, text='Start Training', command=self.start_training)
@@ -56,7 +65,7 @@ class TrainingGUI(tk.Tk):
 
         # status
         self.status_var = tk.StringVar(value='Ready')
-        ttk.Label(container, textvariable=self.status_var).grid(row=5, column=0, columnspan=2)
+        ttk.Label(container, textvariable=self.status_var).grid(row=7, column=0, columnspan=2)
 
         self.param_widgets = {}
         if self.training_combo['values']:
@@ -154,7 +163,14 @@ class TrainingGUI(tk.Tk):
         # include lever names as additional arguments
         lever1 = self.lever1_var.get() or 'Lever1'
         lever2 = self.lever2_var.get() or 'Lever2'
-        cmd = ["python", str(PYGAME_SCRIPT), task_name, str(path), lever1, lever2]
+        # choose runner
+        runner = self.runner_var.get()
+        if runner == 'main':
+            # main.py expects: <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>
+            cmd = ["python", str(MAIN_SCRIPT), task_name, str(path), lever1, lever2]
+        else:
+            # pygame_simulation expects: <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>
+            cmd = ["python", str(PYGAME_SCRIPT), task_name, str(path), lever1, lever2]
         try:
             subprocess.Popen(cmd)
             self.status_var.set(f'Launched {task_name}')
