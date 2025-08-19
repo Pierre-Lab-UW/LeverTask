@@ -1,0 +1,32 @@
+# Parameters for RatioTraining
+# Each parameter includes its name, type, and a default value
+parameters:
+  TaskName:
+    type: str
+    default: RatioTraining
+    actual: RatioTraining
+  Ratio:
+    type: int
+    default: 2
+    actual: 2
+  StartingRatio:
+    type: int
+    default: 1
+    actual: 1
+  RatioType:
+    type: dropdown
+    options: [Fixed, Progressive, Geometric]
+    default: Fixed
+    actual: Geometric
+  ITI:
+    type: int
+    default: 3
+    actual: 3
+  Timeout:
+    type: int
+    default: 10
+    actual: 10
+  ActiveLevers:
+    type: list[str]
+    default: [Lever1]
+    actual: [Lever1]
