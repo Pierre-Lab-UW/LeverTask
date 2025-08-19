@@ -1,6 +1,6 @@
 parameters:
   DisplayTime:
-    actual: 1.0
+    actual: 3.0
     default: 2
     type: float
   PatternLength:

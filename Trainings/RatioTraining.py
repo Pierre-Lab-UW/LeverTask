@@ -40,6 +40,7 @@ class RatioTraining(Training):
         if self.ratio_type not in ["Fixed", "Progressive", "Geometric"]:
             raise ValueError(f"Unknown ratio type: {self.ratio_type}")
         if self.ratio_type == "Fixed":
+            self.current_ratio = self.ratio
             self.output_data_file  = "OutputData/FR{}_data_{}.csv".format(
                 self.ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             )

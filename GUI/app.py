@@ -35,9 +35,20 @@ class TrainingGUI(tk.Tk):
         self.params_frame = ttk.Frame(container, padding=10, borderwidth=1, relief='groove')
         self.params_frame.grid(row=1, column=0, columnspan=2, pady=10)
 
+        # Lever name inputs
+        ttk.Label(container, text='Lever 1 Name:').grid(row=2, column=0, sticky='e')
+        self.lever1_var = tk.StringVar(value='Lever1')
+        self.lever1_entry = ttk.Entry(container, textvariable=self.lever1_var, width=30)
+        self.lever1_entry.grid(row=2, column=1, sticky='w', padx=8, pady=4)
+
+        ttk.Label(container, text='Lever 2 Name:').grid(row=3, column=0, sticky='e')
+        self.lever2_var = tk.StringVar(value='Lever2')
+        self.lever2_entry = ttk.Entry(container, textvariable=self.lever2_var, width=30)
+        self.lever2_entry.grid(row=3, column=1, sticky='w', padx=8, pady=4)
+
         # Buttons
         btn_frame = ttk.Frame(container)
-        btn_frame.grid(row=2, column=0, columnspan=2, pady=8)
+        btn_frame.grid(row=4, column=0, columnspan=2, pady=8)
         self.save_btn = ttk.Button(btn_frame, text='Save Params', command=self.save_params)
         self.save_btn.grid(row=0, column=0, padx=6)
         self.start_btn = ttk.Button(btn_frame, text='Start Training', command=self.start_training)
@@ -45,7 +56,7 @@ class TrainingGUI(tk.Tk):
 
         # status
         self.status_var = tk.StringVar(value='Ready')
-        ttk.Label(container, textvariable=self.status_var).grid(row=3, column=0, columnspan=2)
+        ttk.Label(container, textvariable=self.status_var).grid(row=5, column=0, columnspan=2)
 
         self.param_widgets = {}
         if self.training_combo['values']:
@@ -140,7 +151,10 @@ class TrainingGUI(tk.Tk):
         task_meta = data.get('parameters', {}).get('TaskName', {})
         task_name = task_meta.get('actual') or task_meta.get('default') or Path(sel).stem
         # launch subprocess
-        cmd = ["python", str(PYGAME_SCRIPT), task_name, str(path)]
+        # include lever names as additional arguments
+        lever1 = self.lever1_var.get() or 'Lever1'
+        lever2 = self.lever2_var.get() or 'Lever2'
+        cmd = ["python", str(PYGAME_SCRIPT), task_name, str(path), lever1, lever2]
         try:
             subprocess.Popen(cmd)
             self.status_var.set(f'Launched {task_name}')

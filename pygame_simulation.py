@@ -48,14 +48,16 @@ class PyGameLever(LeverBase):
 
 # Command line arguments: training class name, parameter file
 if len(sys.argv) < 3:
-    print("Usage: python pygame_simulation.py <TrainingClassName> <ParameterFile>")
+    print("Usage: python pygame_simulation.py <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>")
     sys.exit(1)
 
 training_class_name = sys.argv[1]
 param_file = sys.argv[2]
+lever_1_name = sys.argv[3]
+lever_2_name = sys.argv[4]
 
-lever_pygame_1 = PyGameLever("Lever1",  100, 350, 100, 100)
-lever_pygame_2 = PyGameLever("Lever2",  400, 350, 100, 100)
+lever_pygame_1 = PyGameLever(lever_1_name, 100, 350, 100, 100)
+lever_pygame_2 = PyGameLever(lever_2_name, 400, 350, 100, 100)
 
 # Dynamically import the training class
 try:

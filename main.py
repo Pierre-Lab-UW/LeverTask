@@ -9,15 +9,17 @@ from ADU200 import ADU200
 
 
 # Command line arguments: training class name, parameter file
-if len(sys.argv) < 3:
-    print("Usage: python main.py <TrainingClassName> <ParameterFile>")
+if len(sys.argv) < 5:
+    print("Usage: python main.py <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>")
     sys.exit(1)
 
 training_class_name = sys.argv[1]
 param_file = sys.argv[2]
+lever_1_name = sys.argv[3]
+lever_2_name = sys.argv[4]
 
-lever_1:LeverBase = SwitchLever("rpi_1_lever", 0)
-lever_2:LeverBase = SwitchLever("rpi_2_lever", 3)
+lever_1:LeverBase = SwitchLever(lever_1_name, 0)
+lever_2:LeverBase = SwitchLever(lever_2_name, 3)
 
 # add a debug event for helpful logging
 lever_1.add_event(DebugEvent("debug", lever_1))
