@@ -1,5 +1,6 @@
 from LeverBase import LeverBase
 from typing import Dict
+import yaml
 
 class Training:
     '''
@@ -13,11 +14,16 @@ class Training:
         Lever1 (LeverBase): The first lever being used.
         Lever2 (LeverBase) The second lever being used..
     '''
-    def __init__(self, lever1:LeverBase, lever2:LeverBase, params:Dict[str, int] = {}):
-        self.lever1:LeverBase = lever1
-        self.lever2:LeverBase = lever2
-        self.params:Dict[str, int] = params
-        pass
+    def __init__(self, lever1: LeverBase, lever2: LeverBase, yaml_path: str):
+        self.lever1: LeverBase = lever1
+        self.lever2: LeverBase = lever2
+        # Load parameters from YAML file
+        with open(yaml_path, 'r') as f:
+            yaml_data = yaml.safe_load(f)
+        # Use 'actual' value if present, else 'default'
+        self.params = {k: v.get('actual', v.get('default')) for k, v in yaml_data['parameters'].items()}
+
+
     
     def start_event(self):
         """
@@ -31,20 +37,20 @@ class Training:
         """
         pass        
     
-    def get_param(self, param_name) -> int:
-        '''Gets the value of a parameter.
+    def get_param(self, param_name, default=None):
+       '''Gets the value of a parameter.
            
-           Parameters
-           ----------
-                param_name : str 
-                The name of the param we want.
+         Parameters
+         ----------
+             param_name : str 
+             The name of the param we want.
+             default : any
+             The default value to return if param is not found.
 
-           Returns:
-                The value of the specified parameter for this training.
-        '''
-        if not param_name in self.params.keys():
-            raise Exception("Param "+str(param_name)+" not found in the dict!")
-        return self.params[param_name]
+         Returns:
+             The value of the specified parameter for this training, or default if not found.
+       '''
+       return self.params.get(param_name, default)
     
     def update(self):
         """Called in a while loop. Should be overidden."""
