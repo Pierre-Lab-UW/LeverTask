@@ -1,3 +1,4 @@
+from ADU200 import ADU200
 from typing import Dict
 import sys
 import importlib
@@ -5,7 +6,6 @@ import LeverBase
 from LeverEventBase import DebugEvent
 from SwitchLever import SwitchLever
 from Training import Training
-from ADU200 import ADU200
 
 
 # Command line arguments: training class name, parameter file
