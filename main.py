@@ -18,8 +18,8 @@ param_file = sys.argv[2]
 lever_1_name = sys.argv[3]
 lever_2_name = sys.argv[4]
 
-lever_1:LeverBase = SwitchLever(lever_1_name, 0)
-lever_2:LeverBase = SwitchLever(lever_2_name, 3)
+lever_1:LeverBase = SwitchLever(lever_1_name, 0, 0)
+lever_2:LeverBase = SwitchLever(lever_2_name, 3, 1)
 
 # add a debug event for helpful logging
 lever_1.add_event(DebugEvent("debug", lever_1))
