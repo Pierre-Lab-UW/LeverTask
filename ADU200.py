@@ -101,12 +101,12 @@ if __name__ == "__main__":
         for i in range(5):
             print(f"Cycle {i+1}: Turning relay 0 ON")
             adu.set_relay(0, set_open=False)
-            #adu.set_relay(1, set_open=False)
+            adu.set_relay(1, set_open=False)
             time.sleep(2)
 
             print(f"Cycle {i+1}: Turning relay 0 OFF")
             adu.set_relay(0, set_open=True)
-            #adu.set_relay(1, set_open=True)
+            adu.set_relay(1, set_open=True)
             time.sleep(2)
     finally:
         adu.disconnect()
