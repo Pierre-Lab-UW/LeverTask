@@ -170,6 +170,8 @@ class RatioTraining(Training):
                 LeverStateChangedEvent("lever2_press", self.lever2, self._on_lever_state_changed)
             )
         self.start_time = time.time()
+        self.lever1.set_is_active(True)
+        self.lever2.set_is_active(True)
 
     def stop_event(self):
         self.lever1.events.clear()

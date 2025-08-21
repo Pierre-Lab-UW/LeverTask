@@ -38,7 +38,9 @@ class PatternMimicTraining(Training):
         from Events.LeverStateChangedEvent import LeverStateChangedEvent
         self.lever1.add_event(LeverStateChangedEvent("lever1_press", self.lever1, lambda lever, new_state: self._on_lever_state_changed(0, new_state)))
         self.lever2.add_event(LeverStateChangedEvent("lever2_press", self.lever2, lambda lever, new_state: self._on_lever_state_changed(1, new_state)))
-
+        self.lever1.set_is_active(True)
+        self.lever2.set_is_active(True)
+        
     def _display_pattern(self):
         print(f"Pattern to mimic: {self.pattern}")
         self.lever1.set_is_active(False)
