@@ -5,7 +5,7 @@ class SwitchLever(LeverBase):
     def __init__(self, lever_name: str, relay_pin_in:int, relay_pin_out:int):
         super().__init__(lever_name)
         self.relay_pin_in = relay_pin_in #pin that reads in if the lever is being pressed
-        self.relay_pin_out = relay_pin_out #pin that controls the lever
+        self.relay_pin_out = relay_pin_out #pin for the output led that represents the lever
 
     def update_state_continously(self) -> None:
         try:
