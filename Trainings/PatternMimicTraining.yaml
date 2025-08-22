@@ -1,0 +1,17 @@
+parameters:
+  DisplayTime:
+    actual: 3.0
+    default: 2
+    type: float
+  PatternLength:
+    actual: 5
+    default: 5
+    type: int
+  TaskName:
+    actual: PatternMimicTraining
+    default: PatternMimicTraining
+    type: str
+  Timeout:
+    actual: 10
+    default: 10
+    type: int

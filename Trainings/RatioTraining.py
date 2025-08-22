@@ -40,6 +40,7 @@ class RatioTraining(Training):
         if self.ratio_type not in ["Fixed", "Progressive", "Geometric"]:
             raise ValueError(f"Unknown ratio type: {self.ratio_type}")
         if self.ratio_type == "Fixed":
+            self.current_ratio = self.ratio
             self.output_data_file  = "OutputData/FR{}_data_{}.csv".format(
                 self.ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             )
@@ -161,13 +162,19 @@ class RatioTraining(Training):
     def start_event(self):
         self.create_timestamped_csv()
         if self.lever1.name in self.active_levers:
+            self.lever1.set_is_active(True)
             self.lever1.add_event(
                 LeverStateChangedEvent("lever1_press", self.lever1, self._on_lever_state_changed)
             )
+        else:
+            self.lever1.set_is_active(False)
         if self.lever2.name in self.active_levers:
+            self.lever2.set_is_active(True)
             self.lever2.add_event(
                 LeverStateChangedEvent("lever2_press", self.lever2, self._on_lever_state_changed)
             )
+        else:
+            self.lever2.set_is_active(False)
         self.start_time = time.time()
 
     def stop_event(self):
@@ -179,8 +186,10 @@ class RatioTraining(Training):
         if not self.lever1.active and not self.lever2.active:
             elapsed: float = now - self.last_reset_time
             if elapsed > self.ITI:
-                self.lever1.set_is_active(True)
-                self.lever2.set_is_active(True)
+                if self.lever1.name in self.active_levers:
+                    self.lever1.set_is_active(True)
+                if self.lever2.name in self.active_levers:
+                    self.lever2.set_is_active(True)
                 self.last_lever_press_time = time.time()
                 #ADU200.get_instance().set_relay(0, False)
                 if self.ratio_type == "Fixed":
