@@ -162,16 +162,16 @@ class RatioTraining(Training):
     def start_event(self):
         self.create_timestamped_csv()
         if self.lever1.name in self.active_levers:
+            self.lever1.set_is_active(True)
             self.lever1.add_event(
                 LeverStateChangedEvent("lever1_press", self.lever1, self._on_lever_state_changed)
             )
         if self.lever2.name in self.active_levers:
+            self.lever2.set_is_active(True)
             self.lever2.add_event(
                 LeverStateChangedEvent("lever2_press", self.lever2, self._on_lever_state_changed)
             )
         self.start_time = time.time()
-        self.lever1.set_is_active(True)
-        self.lever2.set_is_active(True)
 
     def stop_event(self):
         self.lever1.events.clear()
