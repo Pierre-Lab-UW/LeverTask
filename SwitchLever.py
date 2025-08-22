@@ -9,7 +9,7 @@ class SwitchLever(LeverBase):
 
     def update_state_continously(self) -> None:
         try:
-            new_state: int = ADU200.get_instance().get_port_status(self.relay_pin)
+            new_state: int = ADU200.get_instance().get_port_status(self.relay_pin_in)
             if new_state != self.state and new_state != None:
                 print(self.name+" State: "+str(new_state))
                 self.set_state(new_state)
