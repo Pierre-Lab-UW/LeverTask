@@ -182,8 +182,10 @@ class RatioTraining(Training):
         if not self.lever1.active and not self.lever2.active:
             elapsed: float = now - self.last_reset_time
             if elapsed > self.ITI:
-                self.lever1.set_is_active(True)
-                self.lever2.set_is_active(True)
+                if self.lever1.name in self.active_levers:
+                    self.lever1.set_is_active(True)
+                if self.lever2.name in self.active_levers:
+                    self.lever2.set_is_active(True)
                 self.last_lever_press_time = time.time()
                 #ADU200.get_instance().set_relay(0, False)
                 if self.ratio_type == "Fixed":
