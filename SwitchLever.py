@@ -18,6 +18,7 @@ class SwitchLever(LeverBase):
         #check for state via output pin of lever
     def set_is_active(self, val: bool):
         super().set_is_active(val)
+        print("Relay Pinout:   {}".format(self.relay_pin_out))
         ADU200.get_instance().set_relay(self.relay_pin_out, set_open=not val)
         
 
