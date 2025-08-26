@@ -47,14 +47,17 @@ class PyGameLever(LeverBase):
 
 
 # Command line arguments: training class name, parameter file
-if len(sys.argv) < 3:
-    print("Usage: python pygame_simulation.py <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>")
+if len(sys.argv) < 6:
+    print("Usage: python pygame_simulation.py <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name> <GlobalParamFile>")
     sys.exit(1)
 
 training_class_name = sys.argv[1]
 param_file = sys.argv[2]
 lever_1_name = sys.argv[3]
 lever_2_name = sys.argv[4]
+globalparam = sys.argv[5]
+
+print(f"Global Parameter File: {globalparam}")
 
 lever_pygame_1 = PyGameLever(lever_1_name, 100, 350, 100, 100)
 lever_pygame_2 = PyGameLever(lever_2_name, 400, 350, 100, 100)

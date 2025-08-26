@@ -1,0 +1,49 @@
+parameters:
+  Cage:
+    actual: ''
+    default: ''
+    description: Cage identifier
+    type: str
+  ExternalOutput:
+    actual: Light
+    default: Light
+    description: Type of external output
+    options:
+    - Light
+    - Buzzers
+    - Scent
+    type: dropdown
+  NumberOfTrials:
+    actual: 100
+    default: 100
+    description: Number of trials in session
+    type: int
+  PiSystem:
+    actual: ''
+    default: ''
+    description: Pi system identifier
+    type: str
+  Room:
+    actual: ''
+    default: ''
+    description: Room identifier
+    type: str
+  SessionLength:
+    actual: 60.0
+    default: 60.0
+    description: Session length in minutes
+    type: float
+  Sex:
+    actual: ''
+    default: ''
+    description: Sex of the subject
+    type: str
+  Subject:
+    actual: ''
+    default: ''
+    description: Subject identifier
+    type: str
+  TaskName:
+    actual: DefaultTraining
+    default: DefaultTraining
+    type: str

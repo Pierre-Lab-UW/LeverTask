@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import yaml
 import glob
 import os
@@ -15,7 +15,7 @@ class TrainingGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Training Runner')
-        self.geometry('600x500')
+        self.geometry('600x600')
         self.resizable(False, False)
         # center window
         self.eval('tk::PlaceWindow . center')
@@ -47,11 +47,21 @@ class TrainingGUI(tk.Tk):
         self.lever2_entry = ttk.Entry(container, textvariable=self.lever2_var, width=30)
         self.lever2_entry.grid(row=3, column=1, sticky='w', padx=8, pady=4)
 
+        ttk.Label(container, text='GlobalParameter File:').grid(row=4, column=0, sticky='e')
+        self.globalparam_var = tk.StringVar()
+        gp_frame = ttk.Frame(container)
+        gp_frame.grid(row=4, column=1, sticky='w', padx=8, pady=4)
+        self.globalparam_entry = ttk.Entry(gp_frame, textvariable=self.globalparam_var, width=30)
+        self.globalparam_entry.pack(side='left')
+        ttk.Button(gp_frame, text="Browse", command=self.browse_globalparam).pack(side='left', padx=4)
+
+
+
         # Runner selection (pygame_simulation.py or main.py)
-        ttk.Label(container, text='Runner:').grid(row=4, column=0, sticky='e')
+        ttk.Label(container, text='Runner:').grid(row=5, column=0, sticky='e')
         self.runner_var = tk.StringVar(value='pygame')
         runner_frame = ttk.Frame(container)
-        runner_frame.grid(row=4, column=1, sticky='w', padx=8, pady=4)
+        runner_frame.grid(row=5, column=1, sticky='w', padx=8, pady=4)
         ttk.Radiobutton(runner_frame, text='Pygame', value='pygame', variable=self.runner_var).pack(side='left')
         ttk.Radiobutton(runner_frame, text='Main', value='main', variable=self.runner_var).pack(side='left')
 
@@ -163,19 +173,28 @@ class TrainingGUI(tk.Tk):
         # include lever names as additional arguments
         lever1 = self.lever1_var.get() or 'Lever1'
         lever2 = self.lever2_var.get() or 'Lever2'
+        globalparam = self.globalparam_var.get() or ''
         # choose runner
         runner = self.runner_var.get()
         if runner == 'main':
             # main.py expects: <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>
-            cmd = ["python", str(MAIN_SCRIPT), task_name, str(path), lever1, lever2]
+            cmd = ["python", str(MAIN_SCRIPT), task_name, str(path), lever1, lever2, globalparam]
         else:
             # pygame_simulation expects: <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>
-            cmd = ["python", str(PYGAME_SCRIPT), task_name, str(path), lever1, lever2]
+            cmd = ["python", str(PYGAME_SCRIPT), task_name, str(path), lever1, lever2, globalparam]
         try:
             subprocess.Popen(cmd)
             self.status_var.set(f'Launched {task_name}')
         except Exception as e:
             messagebox.showerror('Error', str(e))
+    
+    def browse_globalparam(self):
+        file_path = filedialog.askopenfilename(
+            title="Select GlobalParameter File",
+            filetypes=[("YAML files", "*.yaml *.yml"), ("All files", "*.*")]
+        )
+        if file_path:
+            self.globalparam_var.set(file_path)
 
 if __name__ == '__main__':
     app = TrainingGUI()
