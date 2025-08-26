@@ -6,8 +6,8 @@ import csv
 import os
 
 class DefaultTraining(Training):
-    def __init__(self, lever1: LeverBase, lever2: LeverBase, yaml_path: str = None):
-        super().__init__(lever1, lever2, yaml_path)
+    def __init__(self, lever1: LeverBase, lever2: LeverBase, yaml_path: str = None,  global_param_file: str = None):
+        super().__init__(lever1, lever2, yaml_path, global_param_file)
         self.output_data_file = f"OutputData/DefaultTraining_data_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
         self._create_csv()
 

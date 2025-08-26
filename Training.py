@@ -14,17 +14,20 @@ class Training:
         Lever1 (LeverBase): The first lever being used.
         Lever2 (LeverBase) The second lever being used..
     '''
-    def __init__(self, lever1: LeverBase, lever2: LeverBase, yaml_path: str):
+    def __init__(self, lever1: LeverBase, lever2: LeverBase, params_yaml_path: str, global_params_yaml_path: str):
         self.lever1: LeverBase = lever1
         self.lever2: LeverBase = lever2
         # Load parameters from YAML file
-        with open(yaml_path, 'r') as f:
+        with open(params_yaml_path, 'r') as f:
             yaml_data = yaml.safe_load(f)
         # Use 'actual' value if present, else 'default'
         self.params = {k: v.get('actual', v.get('default')) for k, v in yaml_data['parameters'].items()}
 
+        with open(global_params_yaml_path, 'r') as f:
+            yaml_data = yaml.safe_load(f)
+        # Use 'actual' value if present, else 'default'
+        self.global_params = {k: v.get('actual', v.get('default')) for k, v in yaml_data['parameters'].items()}
 
-    
     def start_event(self):
         """
         This method gets called at the start of the event. 
@@ -52,6 +55,21 @@ class Training:
        '''
        return self.params.get(param_name, default)
     
+    def get_global_param(self, param_name, default=None):
+        '''Gets the value of a global parameter.
+
+         Parameters
+         ----------
+             param_name : str
+             The name of the global param we want.
+             default : any
+             The default value to return if param is not found.
+
+         Returns:
+             The value of the specified global parameter for this training, or default if not found.
+       '''
+        return self.global_params.get(param_name, default)
+
     def update(self):
         """Called in a while loop. Should be overidden."""
         pass

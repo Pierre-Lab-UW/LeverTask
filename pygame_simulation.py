@@ -6,6 +6,8 @@ from LeverEventBase import LeverEventBase, DebugEvent
 from Events.RecordDataEvent import *
 from Trainings import *
 import importlib
+import os
+
 pygame.init()
 
 window = pygame.display.set_mode((600,600))
@@ -55,9 +57,15 @@ training_class_name = sys.argv[1]
 param_file = sys.argv[2]
 lever_1_name = sys.argv[3]
 lever_2_name = sys.argv[4]
-globalparam = sys.argv[5]
+global_param_file = sys.argv[5]
 
-print(f"Global Parameter File: {globalparam}")
+print(f"Global Parameter File: {global_param_file}")
+
+if os.path.isfile(global_param_file):
+    print(f"Global parameter file '{global_param_file}' found.")
+else:
+    print(f"Global parameter file '{global_param_file}' not found.")
+    sys.exit(1)
 
 lever_pygame_1 = PyGameLever(lever_1_name, 100, 350, 100, 100)
 lever_pygame_2 = PyGameLever(lever_2_name, 400, 350, 100, 100)
@@ -70,7 +78,7 @@ except (ModuleNotFoundError, AttributeError):
     print(f"Could not find training class '{training_class_name}' in Trainings/{training_class_name}.py")
     sys.exit(1)
 
-training_instance = TrainingClass(lever_pygame_1, lever_pygame_2, param_file)
+training_instance = TrainingClass(lever_pygame_1, lever_pygame_2, param_file, global_param_file)
 training_instance.start_event()
 
 pygame_events = pygame.event.get()

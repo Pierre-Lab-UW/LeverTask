@@ -13,9 +13,10 @@ class RatioTraining(Training):
         self,
         lever1: LeverBase,
         lever2: LeverBase,
-        param_file: str
+        param_file: str,
+        global_param_file: str
     ) -> None:
-        super().__init__(lever1, lever2, param_file)
+        super().__init__(lever1, lever2, param_file, global_param_file)
         self.press_counts: Dict[str, int] = {
             self.lever1.name: 0,
             self.lever2.name: 0

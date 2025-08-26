@@ -7,8 +7,8 @@ import csv
 import os
 
 class PatternMimicTraining(Training):
-    def __init__(self, lever1: LeverBase, lever2: LeverBase, yaml_path: str):
-        super().__init__(lever1, lever2, yaml_path)
+    def __init__(self, lever1: LeverBase, lever2: LeverBase, yaml_path: str, global_param_file: str):
+        super().__init__(lever1, lever2, yaml_path, global_param_file)
         self.pattern_length = self.get_param("PatternLength", 5)
         self.pattern = [random.choice([0, 1]) for _ in range(self.pattern_length)]
         self.current_index = 0

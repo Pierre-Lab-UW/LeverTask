@@ -17,7 +17,7 @@ training_class_name = sys.argv[1]
 param_file = sys.argv[2]
 lever_1_name = sys.argv[3]
 lever_2_name = sys.argv[4]
-globalparam = sys.argv[5]
+global_param_file = sys.argv[5]
 
 lever_1:LeverBase = SwitchLever(lever_1_name, 0, 0)
 lever_2:LeverBase = SwitchLever(lever_2_name, 3, 1)
@@ -34,7 +34,7 @@ except (ModuleNotFoundError, AttributeError):
     print(f"Could not find training class '{training_class_name}' in Trainings/{training_class_name}.py")
     sys.exit(1)
 
-training_instance = TrainingClass(lever_1, lever_2, param_file)
+training_instance = TrainingClass(lever_1, lever_2, param_file, global_param_file)
 training_instance.start_event()
 
 ADU200.get_instance()
