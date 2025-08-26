@@ -36,8 +36,8 @@ class PatternMimicTraining(Training):
         self._display_pattern()
         self.start_time = time.time()
         from Events.LeverStateChangedEvent import LeverStateChangedEvent
-        self.lever1.add_event(LeverStateChangedEvent("lever1_press", self.lever1, lambda lever, new_state: self._on_lever_state_changed(0, new_state)))
-        self.lever2.add_event(LeverStateChangedEvent("lever2_press", self.lever2, lambda lever, new_state: self._on_lever_state_changed(1, new_state)))
+        self.lever1.add_event(LeverStateChangedEvent("lever1_press", self.lever1, lambda lever, new_state, time_since_last_change: self._on_lever_state_changed(0, new_state, time_since_last_change)))
+        self.lever2.add_event(LeverStateChangedEvent("lever2_press", self.lever2, lambda lever, new_state, time_since_last_change: self._on_lever_state_changed(1, new_state, time_since_last_change)))
         self.lever1.set_is_active(True)
         self.lever2.set_is_active(True)
         
@@ -48,11 +48,12 @@ class PatternMimicTraining(Training):
         self.displaying_pattern = True
         self.display_start_time = time.time()
 
-    def _on_lever_state_changed(self, lever_value, new_state):
+    def _on_lever_state_changed(self, lever_value, new_state, time_since_last_change):
         now = time.time()
         # Only count as a press when new_state == 0
         if new_state != 0:
             return
+        print(f"Lever {lever_value} state changed after {time_since_last_change:.3f} seconds")
         # Timeout logic
         if now - self.last_lever_press_time > self.timeout_time:
             print("Timed out! Generating new pattern.")

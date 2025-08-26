@@ -8,6 +8,6 @@ class RecordDataEvent(LeverEventBase):
         self.start_time = time.time()
         self.timestamps[0] = lever.get_state()
         
-    def on_lever_state_change(self, new_lever_state):
+    def on_lever_state_change(self, new_lever_state, time_since_last_change):
         self.timestamps[time.time()-self.start_time] = new_lever_state
         print(self.timestamps)

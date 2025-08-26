@@ -24,14 +24,16 @@ class LeverEventBase:
         '''Called continuously while the lever is active.'''
         pass
     
-    def on_lever_state_change(self, new_lever_state):
+    def on_lever_state_change(self, new_lever_state, time_since_last_change):
         """
-        Called when the state of the lever changes(Pressed or Unpressed).
+        Called when the state of the lever changes (Pressed or Unpressed).
 
         Parameters
         ----------
-        state : int 
+        new_lever_state : int
             The new state of the lever. 0 if the lever is not being pressed, 1 if the lever is being pressed.
+        time_since_last_change : float
+            The time in seconds since the last state change.
         """
         pass
     
@@ -45,8 +47,8 @@ class LeverEventBase:
 class DebugEvent(LeverEventBase):
     def on_lever_initialize(self):
         print("The lever has been created")
-    def on_lever_state_change(self, new_lever_state):
-        print("Lever "+self.lever.name+" state has been changed to "+str(new_lever_state))
+    def on_lever_state_change(self, new_lever_state, time_since_last_change):
+        print(f"Lever {self.lever.name} state changed to {new_lever_state} after {time_since_last_change:.3f} seconds")
     def on_lever_stopped(self):
         print("Lever is no longer active")
     

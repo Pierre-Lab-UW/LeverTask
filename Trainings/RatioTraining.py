@@ -98,9 +98,10 @@ class RatioTraining(Training):
             writer.writerow(row_with_index)
 
 
-    def _on_lever_state_changed(self, lever: LeverBase, new_state: int):
+    def _on_lever_state_changed(self, lever: LeverBase, new_state: int, time_since_last_change: float):
         if not lever.active:
             return
+        print(f"Lever {lever.name} state changed to {new_state} after {time_since_last_change:.3f} seconds")
         if new_state == 1:
             self.last_lever_press_time = time.time()        
             self.press_counts[lever.name] += 1
@@ -129,7 +130,9 @@ class RatioTraining(Training):
             cur_time:float = time.time()
             button_pressed_dur: int =  cur_time - self.durations[lever.name]
             reward_flag = 0
-
+            print(f"{lever.name} Calculated Button Press Duration: {button_pressed_dur}")
+            print(f"{lever.name} Parameter Button Press Duration: {self.press_counts[lever.name]}")
+            
             if self.press_counts[lever.name] >= self.current_ratio:
                 print("Cooldown!")
                 self.press_counts[lever.name] = 0

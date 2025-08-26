@@ -24,6 +24,7 @@ class LeverBase():
         self.state:int = STATE_UNPRESSED
         self.name:str = lever_name
         self.active:bool = True
+        self._last_state_change_time = None
     def get_state(self) -> int:
         '''Returns the current state of the lever.
 
@@ -40,11 +41,18 @@ class LeverBase():
         state : int
             The value that we want to set the state to. 0 if the lever is not being pressed, 1 if the lever is being pressed.
         """
+        import time
         #check if the state is already currently set to what we want to prevent events form running every frame
         if self.state != state:
+            now = time.time()
+            if self._last_state_change_time is None:
+                time_since_last_change = 0.0
+            else:
+                time_since_last_change = now - self._last_state_change_time
+            self._last_state_change_time = now
             self.state = state
             for ev in self.events:
-                ev.on_lever_state_change(self.state)
+                ev.on_lever_state_change(self.state, time_since_last_change)
     
     def update_state_continously(self):
         """

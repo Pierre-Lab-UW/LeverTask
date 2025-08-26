@@ -1,8 +1,8 @@
 parameters:
   ActiveLevers:
     actual:
-    - L1
-    - L2
+    - Lever1
+    - Lever2
     default:
     - Lever1
     type: list[str]
@@ -11,11 +11,11 @@ parameters:
     default: 3
     type: int
   Ratio:
-    actual: 3
+    actual: 2
     default: 2
     type: int
   RatioType:
-    actual: Fixed
+    actual: Progressive
     default: Fixed
     options:
     - Fixed
@@ -23,7 +23,7 @@ parameters:
     - Geometric
     type: dropdown
   StartingRatio:
-    actual: 1
+    actual: 2
     default: 1
     type: int
   TaskName:
