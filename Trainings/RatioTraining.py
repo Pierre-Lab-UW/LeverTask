@@ -219,7 +219,5 @@ class RatioTraining(Training):
     def should_end_traning(self) -> bool:
         if self.should_end:
             print("Timed out!")
-        return self.should_end
-        
-    
-    
+        return self.should_end or super().should_end_traning()
+

@@ -110,6 +110,3 @@ class PatternMimicTraining(Training):
         if now - self.last_lever_press_time > self.timeout_time:
             print("Timed out! Generating new pattern.")
             self._reset_pattern()
-
-    def should_end_traning(self) -> bool:
-        return False

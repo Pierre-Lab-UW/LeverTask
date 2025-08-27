@@ -29,7 +29,7 @@ parameters:
     description: Room identifier
     type: str
   SessionLength:
-    actual: 60.0
+    actual: 3.0
     default: 60.0
     description: Session length in minutes
     type: float

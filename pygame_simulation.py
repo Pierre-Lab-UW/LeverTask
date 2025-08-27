@@ -86,8 +86,12 @@ clock = pygame.time.Clock()
 while True:
     clock.tick(60)
     pygame_events = pygame.event.get()
+    if training_instance.should_end_traning():
+        training_instance.stop_event()
+        pygame.quit()
+        sys.exit(0)
     for event in pygame_events:
-        if event.type == QUIT or training_instance.should_end_traning():
+        if event.type == QUIT:
             training_instance.stop_event()
             pygame.quit()
             sys.exit(0)

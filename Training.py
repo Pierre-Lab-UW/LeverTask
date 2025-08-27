@@ -1,6 +1,7 @@
 from LeverBase import LeverBase
 from typing import Dict
 import yaml
+import time
 
 class Training:
     '''
@@ -17,6 +18,7 @@ class Training:
     def __init__(self, lever1: LeverBase, lever2: LeverBase, params_yaml_path: str, global_params_yaml_path: str):
         self.lever1: LeverBase = lever1
         self.lever2: LeverBase = lever2
+        self.start_time: float = 0.0
         # Load parameters from YAML file
         with open(params_yaml_path, 'r') as f:
             yaml_data = yaml.safe_load(f)
@@ -32,7 +34,7 @@ class Training:
         """
         This method gets called at the start of the event. 
         """
-        pass
+        self.start_time = time.time()
     
     def stop_event(self):
         """
@@ -80,4 +82,5 @@ class Training:
            Returns:
                 Whether or not the program should end.
         '''
-        return False
+        print(time.time() - self.start_time)
+        return (time.time() - self.start_time) > self.get_global_param("SessionLength", 60)*60
