@@ -15,7 +15,7 @@ class TrainingGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Training Runner')
-        self.geometry('600x600')
+        self.geometry('700x700')
         self.resizable(False, False)
         # center window
         self.eval('tk::PlaceWindow . center')
