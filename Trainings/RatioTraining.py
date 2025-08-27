@@ -42,16 +42,16 @@ class RatioTraining(Training):
             raise ValueError(f"Unknown ratio type: {self.ratio_type}")
         if self.ratio_type == "Fixed":
             self.current_ratio = self.ratio
-            self.output_data_file  = "OutputData/FR{}_data_{}.csv".format(
-                self.ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            self.output_data_file  = "OutputData/{}_FR{}_data_{}.csv".format(
+                self.get_global_param('Subject', 'default_subject'), self.ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             )
         elif self.ratio_type == "Progressive":
-            self.output_data_file = "OutputData/PR{}_data_{}.csv".format(
-                self.ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            self.output_data_file = "OutputData/{}_PR{}_data_{}.csv".format(
+                self.get_global_param('Subject', 'default_subject'), self.ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             )
         elif self.ratio_type == "Geometric":
-            self.output_data_file = "OutputData/GR{}_data_{}.csv".format(
-                self.ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            self.output_data_file = "OutputData/{}_GR{}_data_{}.csv".format(
+                self.get_global_param('Subject', 'default_subject'), self.ratio, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             )
         self.start_time: int = 0
 

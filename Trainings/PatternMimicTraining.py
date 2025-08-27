@@ -21,7 +21,7 @@ class PatternMimicTraining(Training):
         self.displaying_pattern = False
         self.entered_pattern = []
         self.attempt_start_time = time.time()
-        self.output_data_file = f"OutputData/PatternMimic_data_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+        self.output_data_file = f"OutputData/{self.get_global_param('Subject', 'default_subject')}_PatternMimic_data_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
         self._create_csv()
     def _create_csv(self):
         import os, csv

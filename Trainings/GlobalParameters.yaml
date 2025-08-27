@@ -29,7 +29,7 @@ parameters:
     description: Room identifier
     type: str
   SessionLength:
-    actual: 3.0
+    actual: 5.0
     default: 60.0
     description: Session length in minutes
     type: float
@@ -39,8 +39,8 @@ parameters:
     description: Sex of the subject
     type: str
   Subject:
-    actual: ''
-    default: ''
+    actual: chimp1
+    default: default_subject
     description: Subject identifier
     type: str
   TaskName:
