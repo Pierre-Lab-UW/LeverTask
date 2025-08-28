@@ -1,6 +1,6 @@
 parameters:
   Lev1_Active:
-    actual: 'True'
+    actual: true
     default: true
     type: bool
   Lev1_ITI:
@@ -29,7 +29,7 @@ parameters:
     default: 10
     type: int
   Lev2_Active:
-    actual: 'True'
+    actual: true
     default: false
     type: bool
   Lev2_ITI:
@@ -37,7 +37,7 @@ parameters:
     default: 3
     type: int
   Lev2_Iteration:
-    actual: 10
+    actual: 5
     default: 100
     description: Number of trials for Lever 2
     type: int

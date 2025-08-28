@@ -40,7 +40,7 @@ class RatioTraining(Training):
             self.lever1.name: {
                 "ratio": self.get_param("Lev1_StartingRatio"),
                 "base_ratio": self.get_param("Lev1_StartingRatio"),
-                "step": self.get_param("Lev1_StartingRatio"),
+                "step": self.get_param("Lev1_Iteration"),
                 "schedule": self.get_param("Lev1_Schedule"),
                 "iti": self.get_param("Lev1_ITI"),
                 "timeout": self.get_param("Lev1_Timeout"),
@@ -48,19 +48,20 @@ class RatioTraining(Training):
             self.lever2.name: {
                 "ratio": self.get_param("Lev2_StartingRatio"),
                 "base_ratio": self.get_param("Lev2_StartingRatio"),
-                "step": self.get_param("Lev2_StartingRatio"),
+                "step": self.get_param("Lev2_Iteration"),
                 "schedule": self.get_param("Lev2_Schedule"),
                 "iti": self.get_param("Lev2_ITI"),
                 "timeout": self.get_param("Lev2_Timeout"),
             },
         }
 
-        # output file — keep subject naming convention
-        self.output_data_file = "OutputData/{}_{}_data_{}.csv".format(
-            self.get_global_param('Subject', 'default_subject'),
-            "RatioTraining",
-            datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        )
+        if self.lever_params[self.lever1.name]["schedule"] == "Fixed":
+            self.lever_params[self.lever1.name]["ratio"] = self.lever_params[self.lever1.name]["step"]
+
+        if self.lever_params[self.lever2.name]["schedule"] == "Fixed":
+            self.lever_params[self.lever2.name]["ratio"] = self.lever_params[self.lever2.name]["step"]
+        self.output_data_file = f"OutputData/{self.get_global_param('Subject')}_RatioTraining_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        self.lever_to_modify = ''
 
     def create_timestamped_csv(self):
         if not os.path.exists("OutputData"):
@@ -130,6 +131,7 @@ class RatioTraining(Training):
                 self.press_counts[lever_name] = 0
                 self.lever1.set_is_active(False)
                 self.lever2.set_is_active(False)
+                self.lever_to_modify = lever_name
                 self.last_reset_time = time.time()
 
             if self.cur_data[lever_name]:
@@ -179,8 +181,10 @@ class RatioTraining(Training):
 
                 # update ratios per lever depending on schedule
                 for lever_name, cfg in self.lever_params.items():
+                    if lever_name != self.lever_to_modify:
+                        continue
                     if cfg["schedule"] == "Fixed":
-                        cfg["ratio"] = cfg["base_ratio"]
+                        cfg["ratio"] = cfg["step"]
                     elif cfg["schedule"] == "Progressive":
                         cfg["ratio"] += cfg["step"]
                     elif cfg["schedule"] == "Geometric":

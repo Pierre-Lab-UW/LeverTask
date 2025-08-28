@@ -55,8 +55,6 @@ class TrainingGUI(tk.Tk):
         self.globalparam_entry.pack(side='left')
         ttk.Button(gp_frame, text="Browse", command=self.browse_globalparam).pack(side='left', padx=4)
 
-
-
         # Runner selection (pygame_simulation.py or main.py)
         ttk.Label(container, text='Runner:').grid(row=5, column=0, sticky='e')
         self.runner_var = tk.StringVar(value='pygame')
@@ -102,25 +100,37 @@ class TrainingGUI(tk.Tk):
         self.param_widgets = {}
         row = 0
         for key, meta in params.items():
-            ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
             ptype = meta.get('type', 'str')
             actual = meta.get('actual', meta.get('default', ''))
+
             if ptype == 'dropdown':
+                ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 opts = meta.get('options', [])
                 var = tk.StringVar(value=str(actual))
                 cmb = ttk.Combobox(self.params_frame, textvariable=var, values=opts, state='readonly')
                 cmb.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+
+            elif ptype == 'bool':
+                var = tk.BooleanVar(value=bool(actual))
+                chk = ttk.Checkbutton(self.params_frame, text=key, variable=var)
+                chk.grid(row=row, column=0, columnspan=2, sticky='w', padx=6, pady=4)
+                self.param_widgets[key] = (ptype, var)
+
             elif ptype.startswith('list'):
+                ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 var = tk.StringVar(value=str(actual))
                 ent = ttk.Entry(self.params_frame, textvariable=var, width=40)
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+
             else:
+                ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 var = tk.StringVar(value=str(actual))
                 ent = ttk.Entry(self.params_frame, textvariable=var, width=40)
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+
             row += 1
         self.status_var.set(f'Loaded {sel}')
 
@@ -133,7 +143,6 @@ class TrainingGUI(tk.Tk):
             data = yaml.safe_load(f)
         for key, (ptype, var) in self.param_widgets.items():
             val = var.get()
-            # try to coerce types for basic types
             if ptype == 'int':
                 try:
                     data['parameters'][key]['actual'] = int(val)
@@ -146,8 +155,9 @@ class TrainingGUI(tk.Tk):
                 except ValueError:
                     messagebox.showerror('Invalid', f'Parameter {key} expects float')
                     return
+            elif ptype == 'bool':
+                data['parameters'][key]['actual'] = bool(val)
             elif ptype.startswith('list'):
-                # assume input like [a, b]
                 try:
                     parsed = eval(val)
                     data['parameters'][key]['actual'] = parsed
@@ -170,24 +180,20 @@ class TrainingGUI(tk.Tk):
         task_meta = data.get('parameters', {}).get('TaskName', {})
         task_name = task_meta.get('actual') or task_meta.get('default') or Path(sel).stem
         # launch subprocess
-        # include lever names as additional arguments
         lever1 = self.lever1_var.get() or 'Lever1'
         lever2 = self.lever2_var.get() or 'Lever2'
         globalparam = self.globalparam_var.get() or ''
-        # choose runner
         runner = self.runner_var.get()
         if runner == 'main':
-            # main.py expects: <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>
             cmd = ["python", str(MAIN_SCRIPT), task_name, str(path), lever1, lever2, globalparam]
         else:
-            # pygame_simulation expects: <TrainingClassName> <ParameterFile> <Lever1Name> <Lever2Name>
             cmd = ["python", str(PYGAME_SCRIPT), task_name, str(path), lever1, lever2, globalparam]
         try:
             subprocess.Popen(cmd)
             self.status_var.set(f'Launched {task_name}')
         except Exception as e:
             messagebox.showerror('Error', str(e))
-    
+
     def browse_globalparam(self):
         file_path = filedialog.askopenfilename(
             title="Select GlobalParameter File",
