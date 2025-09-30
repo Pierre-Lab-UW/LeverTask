@@ -125,10 +125,9 @@ class RatioTraining(Training):
                 # ratio requirement met -> reward + cooldown
                 reward_flag = 1
 
-                for i in range(len(self.press_counts)):
-                    self.press_counts[i] = 0
-                    
-                self.press_counts[lever_name] = 0
+                for lever in self.press_counts.keys():    
+                    self.press_counts[lever] = 0
+
                 self.lever1.set_is_active(False)
                 self.lever2.set_is_active(False)
                 self.lever_to_modify = lever_name

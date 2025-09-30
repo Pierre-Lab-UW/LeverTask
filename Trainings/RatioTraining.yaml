@@ -8,12 +8,12 @@ parameters:
     default: 3
     type: int
   Lev1_Iteration:
-    actual: 10
+    actual: 2
     default: 100
     description: Number of trials for Lever 1
     type: int
   Lev1_Schedule:
-    actual: Progressive
+    actual: Fixed
     default: Fixed
     options:
     - Fixed
@@ -25,7 +25,7 @@ parameters:
     default: 1
     type: int
   Lev1_Timeout:
-    actual: 10
+    actual: 40
     default: 10
     type: int
   Lev2_Active:
@@ -37,12 +37,12 @@ parameters:
     default: 3
     type: int
   Lev2_Iteration:
-    actual: 5
+    actual: 2
     default: 100
     description: Number of trials for Lever 2
     type: int
   Lev2_Schedule:
-    actual: Fixed
+    actual: Progressive
     default: Fixed
     options:
     - Fixed
@@ -54,7 +54,7 @@ parameters:
     default: 1
     type: int
   Lev2_Timeout:
-    actual: 10
+    actual: 40
     default: 10
     type: int
   TaskName:
