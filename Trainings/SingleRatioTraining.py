@@ -1,6 +1,6 @@
 from typing import Dict
 from Events.LeverStateChangedEvent import LeverStateChangedEvent
-from Training import SingleLeverTraining
+from TestScripts.NewTrainingClasses import SingleLeverTraining
 import time
 from LeverBase import LeverBase
 import csv
@@ -105,6 +105,7 @@ class SingleRatioTraining(SingleLeverTraining):
                 self.press_count = 0
                 lever.set_is_active(False)
                 self.last_reset_time = time.time()
+                print(f"Cooldown for Lever {lever_name} for {cfg['iti']} seconds")
 
             if self.cur_data:
                 self.cur_data[1] = time_since_last_change
@@ -129,6 +130,7 @@ class SingleRatioTraining(SingleLeverTraining):
         self.lever1.events.clear()
 
     def update(self):
+        super().update()
         now = time.time()
 
         # if lever is inactive, check for ITI cooldown
