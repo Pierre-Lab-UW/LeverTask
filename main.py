@@ -5,7 +5,6 @@ import importlib
 import LeverBase
 from LeverEventBase import DebugEvent
 from SwitchLever import SwitchLever
-from Trainings.Training import Training
 
 
 # Command line arguments: training class name, parameter file
