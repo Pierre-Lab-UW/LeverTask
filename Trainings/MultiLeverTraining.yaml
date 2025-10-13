@@ -3,6 +3,7 @@ parameters:
     actual: MultiLeverTraining
     default: MultiLeverTraining
     type: str
+    hidden: true
   training_left_params:
     actual: C:/Users/siddh/OneDrive/Desktop/Coding/Work/LeverTask/Trainings/RatioTraining_single_left.yaml
     default: ''
@@ -15,3 +16,8 @@ parameters:
     description: Path to the YAML parameter file for the right training (relative
       to project or absolute)
     type: str
+  runnable:
+    actual: true
+    default: true
+    hidden: true
+    type: bool

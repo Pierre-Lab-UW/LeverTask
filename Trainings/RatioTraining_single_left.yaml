@@ -32,3 +32,9 @@ parameters:
     actual: SingleRatioTraining
     default: SingleRatioTraining
     type: str
+    hidden: true
+  runnable:
+    actual: false
+    default: false
+    hidden: true
+    type: bool

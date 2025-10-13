@@ -48,21 +48,24 @@ class TrainingGUI(tk.Tk):
         self.lever2_entry = ttk.Entry(container, textvariable=self.lever2_var, width=30)
         self.lever2_entry.grid(row=3, column=1, sticky='w', padx=8, pady=4)
 
-        ttk.Label(container, text='GlobalParameter File:').grid(row=4, column=0, sticky='e')
+        # GlobalParameter File row (store label so we can hide/show)
+        self.globalparam_label = ttk.Label(container, text='GlobalParameter File:')
+        self.globalparam_label.grid(row=4, column=0, sticky='e')
         self.globalparam_var = tk.StringVar()
-        gp_frame = ttk.Frame(container)
-        gp_frame.grid(row=4, column=1, sticky='w', padx=8, pady=4)
-        self.globalparam_entry = ttk.Entry(gp_frame, textvariable=self.globalparam_var, width=30)
+        self.gp_frame = ttk.Frame(container)
+        self.gp_frame.grid(row=4, column=1, sticky='w', padx=8, pady=4)
+        self.globalparam_entry = ttk.Entry(self.gp_frame, textvariable=self.globalparam_var, width=30)
         self.globalparam_entry.pack(side='left')
-        ttk.Button(gp_frame, text="Browse", command=self.browse_globalparam).pack(side='left', padx=4)
+        ttk.Button(self.gp_frame, text="Browse", command=self.browse_globalparam).pack(side='left', padx=4)
 
-        # Runner selection (pygame_simulation.py or main.py)
-        ttk.Label(container, text='Runner:').grid(row=5, column=0, sticky='e')
+        # Runner selection (store label so we can hide/show)
+        self.runner_label = ttk.Label(container, text='Runner:')
+        self.runner_label.grid(row=5, column=0, sticky='e')
         self.runner_var = tk.StringVar(value='pygame')
-        runner_frame = ttk.Frame(container)
-        runner_frame.grid(row=5, column=1, sticky='w', padx=8, pady=4)
-        ttk.Radiobutton(runner_frame, text='Pygame', value='pygame', variable=self.runner_var).pack(side='left')
-        ttk.Radiobutton(runner_frame, text='Main', value='main', variable=self.runner_var).pack(side='left')
+        self.runner_frame = ttk.Frame(container)
+        self.runner_frame.grid(row=5, column=1, sticky='w', padx=8, pady=4)
+        ttk.Radiobutton(self.runner_frame, text='Pygame', value='pygame', variable=self.runner_var).pack(side='left')
+        ttk.Radiobutton(self.runner_frame, text='Main', value='main', variable=self.runner_var).pack(side='left')
 
         # Buttons
         btn_frame = ttk.Frame(container)
@@ -101,6 +104,10 @@ class TrainingGUI(tk.Tk):
         self.param_widgets = {}
         row = 0
         for key, meta in params.items():
+            # skip hidden parameters (default: not hidden)
+            if meta.get('hidden', False):
+                continue
+
             ptype = meta.get('type', 'str')
             actual = meta.get('actual', meta.get('default', ''))
 
@@ -112,6 +119,8 @@ class TrainingGUI(tk.Tk):
                 cmb = ttk.Combobox(self.params_frame, textvariable=var, values=opts, state='readonly')
                 cmb.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+                row += 1
+                continue
 
             # render boolean
             elif ptype == 'bool':
@@ -119,6 +128,8 @@ class TrainingGUI(tk.Tk):
                 chk = ttk.Checkbutton(self.params_frame, text=key, variable=var)
                 chk.grid(row=row, column=0, columnspan=2, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+                row += 1
+                continue
 
             # lists and plain text
             elif ptype.startswith('list'):
@@ -127,6 +138,8 @@ class TrainingGUI(tk.Tk):
                 ent = ttk.Entry(self.params_frame, textvariable=var, width=40)
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+                row += 1
+                continue
 
             # file / filepath parameter -> entry + Browse button
             # also treat parameters whose key suggests a path/file (e.g. contains 'path', 'file', 'params', 'param')
@@ -146,6 +159,8 @@ class TrainingGUI(tk.Tk):
                         v.set(file_path)
                 ttk.Button(frame, text='Browse', command=_browse).pack(side='left', padx=6)
                 self.param_widgets[key] = (ptype, var)
+                row += 1
+                continue
 
             # default string/int/float entry
             else:
@@ -154,9 +169,37 @@ class TrainingGUI(tk.Tk):
                 ent = ttk.Entry(self.params_frame, textvariable=var, width=40)
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+                row += 1
+                continue
 
-            row += 1
         self.status_var.set(f'Loaded {sel}')
+
+        # determine runnable flag from YAML metadata (default False)
+        runnable_meta = params.get('runnable', {})
+        runnable_actual = runnable_meta.get('actual', runnable_meta.get('default', False))
+        # coerce common string forms if necessary
+        if isinstance(runnable_actual, str):
+            runnable_bool = runnable_actual.lower() in ('true', '1', 'yes')
+        else:
+            runnable_bool = bool(runnable_actual)
+
+        # show/hide run-related controls
+        self.set_run_controls_visible(runnable_bool)
+
+    def set_run_controls_visible(self, visible: bool):
+        """Toggle visibility of run-related widgets (global params row, runner, start)."""
+        if visible:
+            self.globalparam_label.grid()
+            self.gp_frame.grid()
+            self.runner_label.grid()
+            self.runner_frame.grid()
+            self.start_btn.grid()
+        else:
+            self.globalparam_label.grid_remove()
+            self.gp_frame.grid_remove()
+            self.runner_label.grid_remove()
+            self.runner_frame.grid_remove()
+            self.start_btn.grid_remove()
 
     def save_params(self):
         sel = self.training_combo.get()
@@ -231,4 +274,3 @@ class TrainingGUI(tk.Tk):
 if __name__ == '__main__':
     app = TrainingGUI()
     app.mainloop()
-    

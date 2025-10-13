@@ -47,3 +47,8 @@ parameters:
     actual: DefaultTraining
     default: DefaultTraining
     type: str
+  runnable:
+    actual: false
+    default: false
+    hidden: true
+    type: bool
