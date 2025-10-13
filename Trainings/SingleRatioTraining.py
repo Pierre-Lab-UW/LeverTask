@@ -1,6 +1,6 @@
 from typing import Dict
 from Events.LeverStateChangedEvent import LeverStateChangedEvent
-from TestScripts.NewTrainingClasses import SingleLeverTraining
+from SingleLeverTraining import SingleLeverTraining
 import time
 from LeverBase import LeverBase
 import csv

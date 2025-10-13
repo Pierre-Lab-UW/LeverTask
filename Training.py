@@ -93,3 +93,4 @@ class Training:
                 Whether or not the program should end.
         '''
         return (time.time() - self.start_time) > self.get_global_param("SessionLength", 60)*60
+

@@ -1,3 +1,4 @@
+# ...existing code...
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import yaml
@@ -103,6 +104,7 @@ class TrainingGUI(tk.Tk):
             ptype = meta.get('type', 'str')
             actual = meta.get('actual', meta.get('default', ''))
 
+            # render dropdown
             if ptype == 'dropdown':
                 ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 opts = meta.get('options', [])
@@ -111,12 +113,14 @@ class TrainingGUI(tk.Tk):
                 cmb.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
 
+            # render boolean
             elif ptype == 'bool':
                 var = tk.BooleanVar(value=bool(actual))
                 chk = ttk.Checkbutton(self.params_frame, text=key, variable=var)
                 chk.grid(row=row, column=0, columnspan=2, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
 
+            # lists and plain text
             elif ptype.startswith('list'):
                 ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 var = tk.StringVar(value=str(actual))
@@ -124,6 +128,26 @@ class TrainingGUI(tk.Tk):
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
 
+            # file / filepath parameter -> entry + Browse button
+            # also treat parameters whose key suggests a path/file (e.g. contains 'path', 'file', 'params', 'param')
+            elif ptype in ('file', 'filepath', 'path') or any(substr in key.lower() for substr in ('path', 'file', 'params', 'param')):
+                ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
+                var = tk.StringVar(value=str(actual))
+                frame = ttk.Frame(self.params_frame)
+                frame.grid(row=row, column=1, sticky='w', padx=6, pady=4)
+                ent = ttk.Entry(frame, textvariable=var, width=30)
+                ent.pack(side='left', fill='x', expand=True)
+                def _browse(v=var, k=key):
+                    file_path = filedialog.askopenfilename(
+                        title=f"Select file for {k}",
+                        filetypes=[("YAML files", "*.yaml *.yml"), ("All files", "*.*")]
+                    )
+                    if file_path:
+                        v.set(file_path)
+                ttk.Button(frame, text='Browse', command=_browse).pack(side='left', padx=6)
+                self.param_widgets[key] = (ptype, var)
+
+            # default string/int/float entry
             else:
                 ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 var = tk.StringVar(value=str(actual))
@@ -156,6 +180,7 @@ class TrainingGUI(tk.Tk):
                     messagebox.showerror('Invalid', f'Parameter {key} expects float')
                     return
             elif ptype == 'bool':
+                # BooleanVar.get() already returns bool
                 data['parameters'][key]['actual'] = bool(val)
             elif ptype.startswith('list'):
                 try:
@@ -164,6 +189,7 @@ class TrainingGUI(tk.Tk):
                 except Exception:
                     data['parameters'][key]['actual'] = val
             else:
+                # includes 'str', 'file', 'filepath', 'path', etc.
                 data['parameters'][key]['actual'] = val
         with open(path, 'w') as f:
             yaml.safe_dump(data, f)
@@ -205,3 +231,4 @@ class TrainingGUI(tk.Tk):
 if __name__ == '__main__':
     app = TrainingGUI()
     app.mainloop()
+    

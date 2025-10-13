@@ -7,7 +7,6 @@ from Events.RecordDataEvent import *
 from Trainings import *
 import importlib
 import os
-
 pygame.init()
 
 window = pygame.display.set_mode((600,600))
@@ -74,9 +73,10 @@ lever_pygame_2 = PyGameLever(lever_2_name, 400, 350, 100, 100)
 try:
     training_module = importlib.import_module(f"Trainings.{training_class_name}")
     TrainingClass = getattr(training_module, training_class_name)
-except (ModuleNotFoundError, AttributeError):
-    print(f"Could not find training class '{training_class_name}' in Trainings/{training_class_name}.py")
+except Exception as e:
+    print(f"Error when loading training '{training_class_name}': {e}")
     sys.exit(1)
+
 
 training_instance = TrainingClass(lever_pygame_1, lever_pygame_2, param_file, global_param_file)
 training_instance.start_event()

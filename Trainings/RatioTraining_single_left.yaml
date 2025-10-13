@@ -29,6 +29,6 @@ parameters:
     default: 10
     type: int
   TaskName:
-    actual: RatioTraining
-    default: RatioTraining
+    actual: SingleRatioTraining
+    default: SingleRatioTraining
     type: str

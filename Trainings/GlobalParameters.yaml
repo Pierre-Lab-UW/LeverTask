@@ -1,6 +1,6 @@
 parameters:
   Cage:
-    actual: ''
+    actual: '000'
     default: ''
     description: Cage identifier
     type: str
@@ -19,12 +19,12 @@ parameters:
     description: Number of trials in session
     type: int
   PiSystem:
-    actual: ''
+    actual: '000'
     default: ''
     description: Pi system identifier
     type: str
   Room:
-    actual: ''
+    actual: '4'
     default: ''
     description: Room identifier
     type: str
@@ -34,12 +34,12 @@ parameters:
     description: Session length in minutes
     type: float
   Sex:
-    actual: ''
+    actual: M
     default: ''
     description: Sex of the subject
     type: str
   Subject:
-    actual: chimp1
+    actual: chimp0
     default: default_subject
     description: Subject identifier
     type: str

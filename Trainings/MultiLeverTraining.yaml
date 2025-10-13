@@ -1,0 +1,17 @@
+parameters:
+  TaskName:
+    actual: MultiLeverTraining
+    default: MultiLeverTraining
+    type: str
+  training_left_params:
+    actual: C:/Users/siddh/OneDrive/Desktop/Coding/Work/LeverTask/Trainings/RatioTraining_single_left.yaml
+    default: ''
+    description: Path to the YAML parameter file for the left training (relative to
+      project or absolute)
+    type: str
+  training_right_params:
+    actual: C:/Users/siddh/OneDrive/Desktop/Coding/Work/LeverTask/Trainings/RatioTraining_single_right.yaml
+    default: ''
+    description: Path to the YAML parameter file for the right training (relative
+      to project or absolute)
+    type: str
