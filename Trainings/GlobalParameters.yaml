@@ -46,6 +46,7 @@ parameters:
   TaskName:
     actual: DefaultTraining
     default: DefaultTraining
+    hidden: true
     type: str
   runnable:
     actual: false

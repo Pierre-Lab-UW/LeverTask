@@ -87,28 +87,38 @@ class MultiLeverTraining(Training):
         This method gets called at the start of the event. 
         """
         super().start_event()
-        self.training_left.start_event()
-        self.training_right.start_event()
+        if (self.get_param("left_lever_enabled", True)):
+            self.training_left.start_event()
+        if (self.get_param("right_lever_enabled", True)):
+            self.training_right.start_event()
 
     def stop_event(self):
         """
         This method gets called when the event is stopped. 
         """ 
         super().stop_event()
-        self.training_left.stop_event()
-        self.training_right.stop_event()
-    
+        if (self.get_param("left_lever_enabled", True)):
+            self.training_left.stop_event()
+        if (self.get_param("right_lever_enabled", True)):
+            self.training_right.stop_event()
+
     def update(self):
         """Called in a while loop. Should be overidden."""
         super().update()
-        self.training_left.update()
-        self.training_right.update()
-    
+        if (self.get_param("left_lever_enabled", True)):
+            self.training_left.update()
+        if (self.get_param("right_lever_enabled", True)):
+            self.training_right.update()
+
     def should_end_traning(self) -> bool:
         '''Signals if the program should end or not. Checked in the main loop.
            
            Returns:
                 Whether or not the program should end.
         '''
+        if (self.get_param("left_lever_enabled", True)):
+            return super().should_end_traning() or self.training_left.should_end_traning()
+        if (self.get_param("right_lever_enabled", True)):
+            return super().should_end_traning() or self.training_right.should_end_traning()
         return super().should_end_traning() or self.training_left.should_end_traning() or self.training_right.should_end_traning()
 # ...existing code...

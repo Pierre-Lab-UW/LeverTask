@@ -1,8 +1,4 @@
 parameters:
-  Lev1_Active:
-    actual: true
-    default: true
-    type: bool
   Lev1_ITI:
     actual: 3
     default: 3
