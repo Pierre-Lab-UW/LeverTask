@@ -27,8 +27,8 @@ parameters:
   TaskName:
     actual: SingleRatioTraining
     default: RatioTraining
-    type: str
     hidden: true
+    type: str
   runnable:
     actual: true
     default: true

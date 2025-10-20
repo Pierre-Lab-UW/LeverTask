@@ -5,7 +5,7 @@ parameters:
     hidden: true
     type: str
   left_lever_enabled:
-    actual: false
+    actual: true
     default: true
     type: bool
   right_lever_enabled:
@@ -24,7 +24,7 @@ parameters:
       project or absolute)
     type: str
   training_right_params:
-    actual: C:/Users/siddh/OneDrive/Desktop/Coding/Work/LeverTask/Trainings/RatioTraining_single_right.yaml
+    actual: C:/Users/siddh/OneDrive/Desktop/Coding/Work/LeverTask/Trainings/SingleStimuliResponse.yaml
     default: ''
     description: Path to the YAML parameter file for the right training (relative
       to project or absolute)
