@@ -27,6 +27,8 @@ class SingleStimuliResponse(SingleLeverTraining):
             self.pulse_duration: float = float(self.get_param("PulseDuration", 0.1))
         except Exception:
             self.pulse_duration = 0.1
+        
+        self.toggle_state: bool = False  # for toggle mode
 
     def create_timestamped_csv(self):
         if not os.path.exists("OutputData"):
@@ -84,14 +86,14 @@ class SingleStimuliResponse(SingleLeverTraining):
 
                 if mode == "pulse":
                     # pulse on press only
-                    if new_state == 1:
+                    if new_state == 0:
                         adu.set_relay(self.relay_output_pin, set_open=False)
                         time.sleep(self.pulse_duration)
                         adu.set_relay(self.relay_output_pin, set_open=True)
 
                 elif mode == "toggle":
                     # toggle on press only
-                    if new_state == 1:
+                    if new_state == 0:
                         try:
                             cur = adu.get_port_status(self.relay_output_pin)
                         except Exception:
@@ -106,7 +108,7 @@ class SingleStimuliResponse(SingleLeverTraining):
                             adu.set_relay(self.relay_output_pin, set_open=not bool(cur))
 
                 else:  # default "step"
-                    if new_state == 1:   # pressed -> activate relay (closed)
+                    if new_state == 0:   # pressed -> activate relay (closed)
                         adu.set_relay(self.relay_output_pin, set_open=False)
                     elif new_state == 0: # released -> deactivate relay (open)
                         adu.set_relay(self.relay_output_pin, set_open=True)

@@ -116,9 +116,9 @@ class MultiLeverTraining(Training):
            Returns:
                 Whether or not the program should end.
         '''
-        if (self.get_param("left_lever_enabled", True)):
+        if (not self.get_param("right_lever_enabled", True)):
             return super().should_end_traning() or self.training_left.should_end_traning()
-        if (self.get_param("right_lever_enabled", True)):
+        if (not self.get_param("left_lever_enabled", True)):
             return super().should_end_traning() or self.training_right.should_end_traning()
-        return super().should_end_traning() or self.training_left.should_end_traning() or self.training_right.should_end_traning()
+        return super().should_end_traning() or (self.training_left.should_end_traning() and self.training_right.should_end_traning())
 # ...existing code...
