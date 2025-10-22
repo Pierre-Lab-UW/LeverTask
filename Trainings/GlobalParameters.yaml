@@ -13,6 +13,16 @@ parameters:
     - Buzzers
     - Scent
     type: dropdown
+  Lever1Name:
+    actual: Lever1
+    default: Lever1
+    description: Lever2 Name
+    type: str
+  Lever2Name:
+    actual: Lever2
+    default: Lever2
+    description: Lever2 Name
+    type: str
   NumberOfTrials:
     actual: 100
     default: 100
@@ -49,7 +59,13 @@ parameters:
     hidden: true
     type: str
   runnable:
-    actual: false
-    default: false
+    actual: true
+    default: true
     hidden: true
     type: bool
+  training_param_file:
+    actual: C:/Users/siddh/OneDrive/Desktop/Coding/Work/LeverTask/Trainings/MultiLeverTraining.yaml
+    default: ''
+    description: Path to the YAML parameter file for the 2 lever training (relative
+      to project or absolute)
+    type: file

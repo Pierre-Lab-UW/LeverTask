@@ -13,7 +13,7 @@ parameters:
     default: true
     type: bool
   runnable:
-    actual: true
+    actual: false
     default: true
     hidden: true
     type: bool
@@ -22,10 +22,10 @@ parameters:
     default: ''
     description: Path to the YAML parameter file for the left training (relative to
       project or absolute)
-    type: str
+    type: file
   training_right_params:
     actual: C:/Users/siddh/OneDrive/Desktop/Coding/Work/LeverTask/Trainings/SingleStimuliResponse.yaml
     default: ''
     description: Path to the YAML parameter file for the right training (relative
       to project or absolute)
-    type: str
+    type: file

@@ -30,35 +30,8 @@ class SingleStimuliResponse(SingleLeverTraining):
         
         self.toggle_state: bool = False  # for toggle mode
 
-    def create_timestamped_csv(self):
-        if not os.path.exists("OutputData"):
-            os.makedirs("OutputData")
-
-        header = [
-            "Response (LP cumulative)", "Lever Name", "Duration", "IRT",
-            "Cumulative time from start", "Stimulus Presented (0/1)"
-        ]
-        with open(self.output_data_file, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(header)
-        print(f"CSV file '{self.output_data_file}' created successfully.")
-
-    def write_row_with_index(self, filename, row_data):
-        index = 0
-        file_exists = os.path.exists(filename)
-        if file_exists:
-            with open(filename, mode='r', newline='') as file:
-                reader = csv.reader(file)
-                rows = list(reader)
-                index = len(rows) - 1  # subtract header
-        row_with_index = [index] + row_data
-        with open(filename, mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(row_with_index)
-
     def start_event(self):
         """Enable lever, create csv and attach event to control relay on press/release."""
-        self.create_timestamped_csv()
         # enable lever and register event
         self.lever1.set_is_active(True)
         self.lever1.add_event(LeverStateChangedEvent(
@@ -122,17 +95,3 @@ class SingleStimuliResponse(SingleLeverTraining):
         # Logging: keep existing behavior, log only on press (new_state == 1)
         if new_state != 1:
             return
-
-        try:
-            elapsed = time.time() - getattr(self, "start_time", time.time())
-            row = [
-                lever.name,          # Lever name as "Response" placeholder
-                "-",                 # Duration placeholder
-                time_since_last_change,  # IRT
-                elapsed,             # cumulative time from start
-                1                    # Stimulus presented
-            ]
-            self.write_row_with_index(self.output_data_file, row)
-        except Exception as e:
-            print(f"Error writing stimulus row: {e}")
-

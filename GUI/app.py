@@ -24,6 +24,9 @@ class TrainingGUI(tk.Tk):
         container = ttk.Frame(self)
         container.place(relx=0.5, rely=0.5, anchor='center')
 
+        #current file path
+        self.current_file_path = ''
+
         # Training selection
         ttk.Label(container, text='Select Training:').grid(row=0, column=0, sticky='w')
         self.training_var = tk.StringVar()
@@ -36,27 +39,6 @@ class TrainingGUI(tk.Tk):
         # Params frame
         self.params_frame = ttk.Frame(container, padding=10, borderwidth=1, relief='groove')
         self.params_frame.grid(row=1, column=0, columnspan=2, pady=10)
-
-        # Lever name inputs
-        ttk.Label(container, text='Lever 1 Name:').grid(row=2, column=0, sticky='e')
-        self.lever1_var = tk.StringVar(value='Lever1')
-        self.lever1_entry = ttk.Entry(container, textvariable=self.lever1_var, width=30)
-        self.lever1_entry.grid(row=2, column=1, sticky='w', padx=8, pady=4)
-
-        ttk.Label(container, text='Lever 2 Name:').grid(row=3, column=0, sticky='e')
-        self.lever2_var = tk.StringVar(value='Lever2')
-        self.lever2_entry = ttk.Entry(container, textvariable=self.lever2_var, width=30)
-        self.lever2_entry.grid(row=3, column=1, sticky='w', padx=8, pady=4)
-
-        # GlobalParameter File row (store label so we can hide/show)
-        self.globalparam_label = ttk.Label(container, text='GlobalParameter File:')
-        self.globalparam_label.grid(row=4, column=0, sticky='e')
-        self.globalparam_var = tk.StringVar()
-        self.gp_frame = ttk.Frame(container)
-        self.gp_frame.grid(row=4, column=1, sticky='w', padx=8, pady=4)
-        self.globalparam_entry = ttk.Entry(self.gp_frame, textvariable=self.globalparam_var, width=30)
-        self.globalparam_entry.pack(side='left')
-        ttk.Button(self.gp_frame, text="Browse", command=self.browse_globalparam).pack(side='left', padx=4)
 
         # Runner selection (store label so we can hide/show)
         self.runner_label = ttk.Label(container, text='Runner:')
@@ -97,6 +79,7 @@ class TrainingGUI(tk.Tk):
         path = TRAININGS_DIR / sel
         with open(path, 'r') as f:
             data = yaml.safe_load(f)
+        self.current_file_path = path
         params = data.get('parameters', {})
         # clear frame
         for w in self.params_frame.winfo_children():
@@ -143,7 +126,7 @@ class TrainingGUI(tk.Tk):
 
             # file / filepath parameter -> entry + Browse button
             # also treat parameters whose key suggests a path/file (e.g. contains 'path', 'file', 'params', 'param')
-            elif ptype in ('file', 'filepath', 'path') or any(substr in key.lower() for substr in ('path', 'file', 'params', 'param')):
+            elif ptype in ('file', 'filepath', 'path'):
                 ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 var = tk.StringVar(value=str(actual))
                 frame = ttk.Frame(self.params_frame)
@@ -189,14 +172,10 @@ class TrainingGUI(tk.Tk):
     def set_run_controls_visible(self, visible: bool):
         """Toggle visibility of run-related widgets (global params row, runner, start)."""
         if visible:
-            self.globalparam_label.grid()
-            self.gp_frame.grid()
             self.runner_label.grid()
             self.runner_frame.grid()
             self.start_btn.grid()
         else:
-            self.globalparam_label.grid_remove()
-            self.gp_frame.grid_remove()
             self.runner_label.grid_remove()
             self.runner_frame.grid_remove()
             self.start_btn.grid_remove()
@@ -248,15 +227,11 @@ class TrainingGUI(tk.Tk):
             data = yaml.safe_load(f)
         task_meta = data.get('parameters', {}).get('TaskName', {})
         task_name = task_meta.get('actual') or task_meta.get('default') or Path(sel).stem
-        # launch subprocess
-        lever1 = self.lever1_var.get() or 'Lever1'
-        lever2 = self.lever2_var.get() or 'Lever2'
-        globalparam = self.globalparam_var.get() or ''
         runner = self.runner_var.get()
         if runner == 'main':
-            cmd = ["python", str(MAIN_SCRIPT), task_name, str(path), lever1, lever2, globalparam]
+            cmd = ["python", str(MAIN_SCRIPT), self.current_file_path]
         else:
-            cmd = ["python", str(PYGAME_SCRIPT), task_name, str(path), lever1, lever2, globalparam]
+            cmd = ["python", str(PYGAME_SCRIPT), self.current_file_path]
         try:
             subprocess.Popen(cmd)
             self.status_var.set(f'Launched {task_name}')
