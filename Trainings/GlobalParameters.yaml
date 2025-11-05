@@ -1,59 +1,9 @@
 parameters:
-  ID:
-    actual: r99999
-    default: r99999
-    description: Subject ID number
-    type: str
-  # Date:
-  #   actual: '2022-6-7'
-  #   default: '2022-6-7'
-  #   description: Date of the session
-  #   type: str
-  Site:
-    actual: WNPRC
-    default: WNPRC
-    description: Site the experiment is being run on.
-    options:
-    - WNPRC
-    - Texas
-    - California
-    type: dropdown
-
-  Obs:
-    actual: mr
-    default: mr
-    description:
-    type: str
-  SessionDuration:
-    actual: 10.0
-    default: 60.0
-    description: Session length in minutes
-    type: float
-  
-  StudyCode:
-    actual: bass2022
-    default: bass2022
-    description: The code for the study being done.
-    type: str
-
-  Housing:
-    actual: Group
-    default: Group
-    description: The housing group of the monkey.
-    type: str
-
   Cage:
     actual: C000
     default: C000
     description: Cage identifier
     type: str
-
-  PiSystem:
-    actual: '000'
-    default: ''
-    description: Pi system identifier
-    type: str  
-  
   ExternalOutput:
     actual: Light
     default: Light
@@ -63,13 +13,16 @@ parameters:
     - Buzzers
     - Scent
     type: dropdown
-
-  RFID:
-    actual: 982091073731607
-    default: 982091073731607
-    description: RFID of the monkey doing the task.
+  Housing:
+    actual: Group
+    default: Group
+    description: The housing group of the monkey.
     type: str
-
+  ID:
+    actual: r99999
+    default: r99999
+    description: Subject ID number
+    type: str
   Lever1Name:
     actual: Lever1
     default: Lever1
@@ -85,11 +38,44 @@ parameters:
     default: 100
     description: Number of trials in session
     type: int
-    
+  Obs:
+    actual: mr
+    default: mr
+    description: null
+    type: str
+  PiSystem:
+    actual: '000'
+    default: ''
+    description: Pi system identifier
+    type: str
+  RFID:
+    actual: '982091073731607'
+    default: 982091073731607
+    description: RFID of the monkey doing the task.
+    type: str
+  SessionDuration:
+    actual: 10.0
+    default: 60.0
+    description: Session length in minutes
+    type: float
   Sex:
     actual: M
     default: ''
     description: Sex of the subject
+    type: str
+  Site:
+    actual: WNPRC
+    default: WNPRC
+    description: Site the experiment is being run on.
+    options:
+    - WNPRC
+    - Texas
+    - California
+    type: dropdown
+  StudyCode:
+    actual: bass2022
+    default: bass2022
+    description: The code for the study being done.
     type: str
   Subject:
     actual: chimp0

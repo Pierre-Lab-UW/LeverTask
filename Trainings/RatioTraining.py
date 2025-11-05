@@ -68,9 +68,26 @@ class RatioTraining(Training):
             os.makedirs("OutputData")
 
         header = [
-            "Response (LP cumulative)", "Lever Name", "Duration", "IRT",
-            "Cumulative time from start", "TO interval", "ITI",
-            "Rewarded (0/1)", "Schedule"
+            "Response (LP cumulative)",
+            "Subject",
+            "Cage",
+            "Date",
+            "ID",
+            "Housing",
+            "obs",
+            "PiSystem",
+            "RFID",
+            "Sex",
+            "Site",
+            "StudyCode",
+            "Lever Name",
+            "Duration",
+            "IRT",
+            "Cumulative time from start", 
+            "TO interval", 
+            "ITI",
+            "Rewarded (0/1)", 
+            "Schedule"
         ]
         with open(self.output_data_file, mode='w', newline='') as file:
             writer = csv.writer(file)
@@ -105,6 +122,17 @@ class RatioTraining(Training):
             self.press_counts[lever_name] += 1
 
             row = [
+                self.get_global_param("Subject", 0),  # Subject
+                self.get_global_param("Cage", 0),  # Cage
+                time.strftime("%Y-%m-%d", time.localtime()),  # current date
+                self.get_global_param("ID", 0),  # ID
+                self.get_global_param("Housing", 0),  # Housing
+                self.get_global_param("obs", 0),  # obs
+                self.get_global_param("PiSystem", 0),  # PiSystem
+                self.get_global_param("RFID", 0),  # RFID
+                self.get_global_param("Sex", 0),  # Sex
+                self.get_global_param("Site", 0),  # Site
+                self.get_global_param("StudyCode", 0),  # StudyCode
                 lever_name,                # Lever name
                 "-",                       # Duration (will be filled on release)
                 time_since_last_change,    # IRT
@@ -135,7 +163,7 @@ class RatioTraining(Training):
 
             if self.cur_data[lever_name]:
                 # fill duration (time_since_last_change gives press duration here)
-                self.cur_data[lever_name][1] = time_since_last_change
+                self.cur_data[lever_name][-7] = time_since_last_change
                 self.cur_data[lever_name][-2] = reward_flag
                 self.write_row_with_index(self.output_data_file, self.cur_data[lever_name])
                 self.cur_data[lever_name] = []
