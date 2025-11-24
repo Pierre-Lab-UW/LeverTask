@@ -17,6 +17,7 @@ class RatioTraining(Training):
         param_file: str,
         global_param_file: str
     ) -> None:
+    
         super().__init__(lever1, lever2, param_file, global_param_file)
 
         # per-lever press counts
@@ -41,10 +42,12 @@ class RatioTraining(Training):
             self.lever1.name: {
                 "RelayOutputType": self.get_param("Lev1_RelayOutputType"),
                 "RelayOutputPin": self.get_param("Lev1_RelayOutputPin"),
+                "OnValue": self.get_param("Lev1_Stim_OnValue"),
             },
             self.lever2.name: {
                 "RelayOutputType": self.get_param("Lev2_RelayOutputType"),
                 "RelayOutputPin": self.get_param("Lev2_RelayOutputPin"),
+                "OnValue": self.get_param("Lev2_Stim_OnValue"),
             }  
         }   
 
@@ -102,6 +105,7 @@ class RatioTraining(Training):
             "TO interval", 
             "ITI",
             "Rewarded (0/1)", 
+            "RewardType",
             "Schedule"
         ]
         with open(self.output_data_file, mode='w', newline='') as file:
@@ -155,10 +159,10 @@ class RatioTraining(Training):
                 0,                         # TO interval placeholder
                 lever_cfg["iti"],          # ITI
                 0,                         # Reward flag (set later)
+                "-",                      # Reward type (set later)
                 lever_cfg["schedule"],     # schedule type
             ]
             self.cur_data[lever_name] = row
-            print(f"{lever_name} Count: {self.press_counts[lever_name]}")
 
         elif new_state == 0:  # released
             self.last_lever_press_time = time.time()
@@ -175,13 +179,14 @@ class RatioTraining(Training):
                 self.lever2.set_is_active(False)
                 self.lever_to_modify = lever_name
                 self.last_reset_time = time.time()
-                self.set_relay(self, lever_name, True) # open relay on release
-
+                self.set_relay(lever_name, True) # Set relay output to be on for reward
+                print(f"Rewarded on {lever_name} press. Starting ITI cooldown.")
 
             if self.cur_data[lever_name]:
                 # fill duration (time_since_last_change gives press duration here)
-                self.cur_data[lever_name][-7] = time_since_last_change
-                self.cur_data[lever_name][-2] = reward_flag
+                self.cur_data[lever_name][12] = time_since_last_change
+                self.cur_data[lever_name][-3] = reward_flag
+                self.cur_data[lever_name][-2] = lever_cfg["relay_output_params"]["RelayOutputType"] if reward_flag == 1 else "-"
                 self.write_row_with_index(self.output_data_file, self.cur_data[lever_name])
                 self.cur_data[lever_name] = []
                 
@@ -226,7 +231,6 @@ class RatioTraining(Training):
                 if self.get_param("Lev2_Active"):
                     self.lever2.set_is_active(True)
                 self.last_lever_press_time = time.time()
-                self.set_relay(self.lever_to_modify, set_out_open=True)
                 # update ratios per lever depending on schedule
                 for lever_name, cfg in self.lever_params.items():
                     if lever_name != self.lever_to_modify:
@@ -239,7 +243,7 @@ class RatioTraining(Training):
                         cfg["ratio"] *= cfg["step"]
 
                 print("Resumed levers after ITI")
-                self.set_relay(self, lever_name, False) # open relay on release
+                self.set_relay(lever_name, False) # Set relay output to be off after ITI period
 
 
         else:
@@ -254,14 +258,20 @@ class RatioTraining(Training):
                     # reset counters after timeout
                     self.press_counts[self.lever1.name] = 0
                     self.press_counts[self.lever2.name] = 0
+                
 
-    def set_relay(self, lever_name: str, set_out_open: bool) -> None:
+    def set_relay(self, lever_name: str, relay_on: bool) -> None:
         params = self.relay_output_params[lever_name]
         adu = ADU200.get_instance()
         pin = params["RelayOutputPin"]
         if pin is None or not isinstance(pin, int) or pin < 0:
             return
-        adu.set_relay(pin, set_open=set_out_open)
+        if relay_on:
+            on_value = params["OnValue"]
+            adu.set_relay(pin, set_open=(on_value == 0))
+        else:
+            on_value = params["OnValue"]
+            adu.set_relay(pin, set_open=(on_value != 0))
     
     
     def should_end_traning(self) -> bool:

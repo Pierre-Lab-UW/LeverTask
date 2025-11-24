@@ -12,6 +12,16 @@ parameters:
     default: 100
     description: Number of trials for Lever 1
     type: int
+  Lev1_RelayOutputPin:
+    actual: 0
+    default: 0
+    description: ADU200 relay pin used to drive the stimulus output
+    type: int
+  Lev1_RelayOutputType:
+    actual: Relay
+    default: Relay
+    description: Logical name/type for the output (for documentation)
+    type: str
   Lev1_Schedule:
     actual: Fixed
     default: Fixed
@@ -27,34 +37,31 @@ parameters:
   Lev1_Timeout:
     actual: 40
     default: 10
-    type: int  
-
-    
-  Lev1_RelayOutputPin:
-    actual: 0
-    default: 0
-    description: ADU200 relay pin used to drive the stimulus output
     type: int
-  Lev1_RelayOutputType:
+  Lev2_RelayOutputType:
     actual: Relay
     default: Relay
     description: Logical name/type for the output (for documentation)
     type: str
-
-  Lev2_Stim_Active:
+  Lev2_Active:
     actual: true
     default: false
     type: bool
-  Lev2_Stim_ITI:
+  Lev2_ITI:
     actual: 3
     default: 3
     type: int
-  Lev2_Stim_Iteration:
+  Lev2_Iteration:
     actual: 2
     default: 100
     description: Number of trials for Lever 2
     type: int
-  Lev2_Stim_Schedule:
+  Lev2_RelayOutputPin:
+    actual: 0
+    default: 0
+    description: ADU200 relay pin used to drive the stimulus output
+    type: int
+  Lev2_Schedule:
     actual: Progressive
     default: Fixed
     options:
@@ -62,26 +69,14 @@ parameters:
     - Progressive
     - Geometric
     type: dropdown
-  Lev2_Stim_StartingRatio:
+  Lev2_StartingRatio:
     actual: 2
     default: 1
     type: int
-  Lev2_Stim_Timeout:
+  Lev2_Timeout:
     actual: 40
     default: 10
     type: int
-
-  Lev2_Stim_RelayOutputPin:
-    actual: 0
-    default: 0
-    description: ADU200 relay pin used to drive the stimulus output
-    type: int
-  Lev2_RelayOutputType:
-    actual: Relay
-    default: Relay
-    description: Logical name/type for the output (for documentation)
-    type: str
-
   TaskName:
     actual: RatioTraining
     default: RatioTraining
