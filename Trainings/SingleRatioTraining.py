@@ -30,7 +30,7 @@ class SingleRatioTraining(SingleLeverTraining):
             "step": self.get_param("Lev1_Iteration"),
             "schedule": self.get_param("Lev1_Schedule"),
             "iti": self.get_param("Lev1_ITI"),
-            "timeout": self.get_param("Lev1_Timeout"),
+            "timeout": self.get_param("Lev1_Timeout")
         }
 
         # If schedule is fixed, ratio = step

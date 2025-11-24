@@ -42,12 +42,12 @@ class RatioTraining(Training):
             self.lever1.name: {
                 "RelayOutputType": self.get_param("Lev1_RelayOutputType"),
                 "RelayOutputPin": self.get_param("Lev1_RelayOutputPin"),
-                "OnValue": self.get_param("Lev1_Stim_OnValue"),
+                "OnValue": self.get_param("Lev1_OnValue"),
             },
             self.lever2.name: {
                 "RelayOutputType": self.get_param("Lev2_RelayOutputType"),
                 "RelayOutputPin": self.get_param("Lev2_RelayOutputPin"),
-                "OnValue": self.get_param("Lev2_Stim_OnValue"),
+                "OnValue": self.get_param("Lev2_OnValue"),
             }  
         }   
 
