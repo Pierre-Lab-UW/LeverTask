@@ -196,6 +196,8 @@ class RatioTraining(Training):
 
     def start_event(self):
         self.create_timestamped_csv()
+        self.set_relay(self.lever1.name, False)
+        self.set_relay(self.lever2.name, False)
         if self.get_param("Lev1_Active"):
             self.lever1.set_is_active(True)
             self.lever1.add_event(
