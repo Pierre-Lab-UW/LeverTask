@@ -72,6 +72,61 @@ class TrainingGUI(tk.Tk):
         names = [os.path.basename(f) for f in files]
         self.training_combo['values'] = names
 
+    # --- Tooltip helper ---
+    class Tooltip:
+        """Simple tooltip for Tk widgets. Shows small window with text on hover."""
+        def __init__(self, widget, text: str, delay: int = 500):
+            self.widget = widget
+            self.text = text
+            self.delay = delay
+            self.tipwindow = None
+            self._after_id = None
+            widget.bind("<Enter>", self._on_enter, add="+")
+            widget.bind("<Leave>", self._on_leave, add="+")
+            widget.bind("<ButtonPress>", self._on_leave, add="+")  # hide on click
+
+        def _on_enter(self, _ev=None):
+            self._schedule()
+
+        def _on_leave(self, _ev=None):
+            self._unschedule()
+            self._hide()
+
+        def _schedule(self):
+            self._unschedule()
+            try:
+                self._after_id = self.widget.after(self.delay, self._show)
+            except Exception:
+                self._after_id = None
+
+        def _unschedule(self):
+            if self._after_id:
+                try:
+                    self.widget.after_cancel(self._after_id)
+                except Exception:
+                    pass
+                self._after_id = None
+
+        def _show(self):
+            if self.tipwindow or not self.text:
+                return
+            x = self.widget.winfo_rootx() + 20
+            y = self.widget.winfo_rooty() + self.widget.winfo_height() + 4
+            self.tipwindow = tw = tk.Toplevel(self.widget)
+            tw.wm_overrideredirect(True)
+            tw.wm_geometry(f"+{x}+{y}")
+            label = tk.Label(tw, text=self.text, justify='left', background='#ffffe0', relief='solid', borderwidth=1,
+                             font=("tahoma", "8"), wraplength=300)
+            label.pack(ipadx=4, ipady=2)
+
+        def _hide(self):
+            if self.tipwindow:
+                try:
+                    self.tipwindow.destroy()
+                except Exception:
+                    pass
+                self.tipwindow = None
+
     def on_select_training(self, event=None):
         sel = self.training_combo.get()
         if not sel:
@@ -93,15 +148,20 @@ class TrainingGUI(tk.Tk):
 
             ptype = meta.get('type', 'str')
             actual = meta.get('actual', meta.get('default', ''))
+            description = meta.get('description', '')
 
             # render dropdown
             if ptype == 'dropdown':
-                ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
+                label = ttk.Label(self.params_frame, text=key+':')
+                label.grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 opts = meta.get('options', [])
                 var = tk.StringVar(value=str(actual))
                 cmb = ttk.Combobox(self.params_frame, textvariable=var, values=opts, state='readonly')
                 cmb.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+                # attach tooltip (prefer label, else combobox)
+                if description:
+                    self.Tooltip(label, description)
                 row += 1
                 continue
 
@@ -111,23 +171,28 @@ class TrainingGUI(tk.Tk):
                 chk = ttk.Checkbutton(self.params_frame, text=key, variable=var)
                 chk.grid(row=row, column=0, columnspan=2, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+                if description:
+                    self.Tooltip(chk, description)
                 row += 1
                 continue
 
             # lists and plain text
             elif ptype.startswith('list'):
-                ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
+                label = ttk.Label(self.params_frame, text=key+':')
+                label.grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 var = tk.StringVar(value=str(actual))
                 ent = ttk.Entry(self.params_frame, textvariable=var, width=40)
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+                if description:
+                    self.Tooltip(ent, description)
                 row += 1
                 continue
 
             # file / filepath parameter -> entry + Browse button
-            # also treat parameters whose key suggests a path/file (e.g. contains 'path', 'file', 'params', 'param')
             elif ptype in ('file', 'filepath', 'path'):
-                ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
+                label = ttk.Label(self.params_frame, text=key+':')
+                label.grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 var = tk.StringVar(value=str(actual))
                 frame = ttk.Frame(self.params_frame)
                 frame.grid(row=row, column=1, sticky='w', padx=6, pady=4)
@@ -142,16 +207,22 @@ class TrainingGUI(tk.Tk):
                         v.set(file_path)
                 ttk.Button(frame, text='Browse', command=_browse).pack(side='left', padx=6)
                 self.param_widgets[key] = (ptype, var)
+                # tooltip attached to entry
+                if description:
+                    self.Tooltip(ent, description)
                 row += 1
                 continue
 
             # default string/int/float entry
             else:
-                ttk.Label(self.params_frame, text=key+':').grid(row=row, column=0, sticky='e', padx=6, pady=4)
+                label = ttk.Label(self.params_frame, text=key+':')
+                label.grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 var = tk.StringVar(value=str(actual))
                 ent = ttk.Entry(self.params_frame, textvariable=var, width=40)
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
                 self.param_widgets[key] = (ptype, var)
+                if description:
+                    self.Tooltip(ent, description)
                 row += 1
                 continue
 

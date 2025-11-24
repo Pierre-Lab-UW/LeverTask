@@ -1,4 +1,5 @@
 from typing import Callable, Optional, Dict
+import ADU200
 from Events.LeverStateChangedEvent import LeverStateChangedEvent
 from Training import Training
 import time
@@ -35,6 +36,18 @@ class RatioTraining(Training):
         self.should_end: bool = False
         self.last_lever_press_time: float = time.time()
 
+        #get relay output params and store then in a dictionary, including pulse information, create one dict for each lever
+        self.relay_output_params = {
+            self.lever1.name: {
+                "RelayOutputType": self.get_param("Lev1_RelayOutputType"),
+                "RelayOutputPin": self.get_param("Lev1_RelayOutputPin"),
+            },
+            self.lever2.name: {
+                "RelayOutputType": self.get_param("Lev2_RelayOutputType"),
+                "RelayOutputPin": self.get_param("Lev2_RelayOutputPin"),
+            }  
+        }   
+
         # per-lever params
         self.lever_params = {
             self.lever1.name: {
@@ -44,6 +57,7 @@ class RatioTraining(Training):
                 "schedule": self.get_param("Lev1_Schedule"),
                 "iti": self.get_param("Lev1_ITI"),
                 "timeout": self.get_param("Lev1_Timeout"),
+                "relay_output_params": self.relay_output_params[self.lever1.name]
             },
             self.lever2.name: {
                 "ratio": self.get_param("Lev2_StartingRatio"),
@@ -52,6 +66,7 @@ class RatioTraining(Training):
                 "schedule": self.get_param("Lev2_Schedule"),
                 "iti": self.get_param("Lev2_ITI"),
                 "timeout": self.get_param("Lev2_Timeout"),
+                "relay_output_params": self.relay_output_params[self.lever2.name]
             },
         }
 
@@ -160,6 +175,8 @@ class RatioTraining(Training):
                 self.lever2.set_is_active(False)
                 self.lever_to_modify = lever_name
                 self.last_reset_time = time.time()
+                self.set_relay(self, lever_name, True) # open relay on release
+
 
             if self.cur_data[lever_name]:
                 # fill duration (time_since_last_change gives press duration here)
@@ -167,6 +184,10 @@ class RatioTraining(Training):
                 self.cur_data[lever_name][-2] = reward_flag
                 self.write_row_with_index(self.output_data_file, self.cur_data[lever_name])
                 self.cur_data[lever_name] = []
+                
+
+            
+            
 
     def start_event(self):
         self.create_timestamped_csv()
@@ -205,7 +226,7 @@ class RatioTraining(Training):
                 if self.get_param("Lev2_Active"):
                     self.lever2.set_is_active(True)
                 self.last_lever_press_time = time.time()
-
+                self.set_relay(self.lever_to_modify, set_out_open=True)
                 # update ratios per lever depending on schedule
                 for lever_name, cfg in self.lever_params.items():
                     if lever_name != self.lever_to_modify:
@@ -218,6 +239,8 @@ class RatioTraining(Training):
                         cfg["ratio"] *= cfg["step"]
 
                 print("Resumed levers after ITI")
+                self.set_relay(self, lever_name, False) # open relay on release
+
 
         else:
             # timeout check
@@ -232,6 +255,15 @@ class RatioTraining(Training):
                     self.press_counts[self.lever1.name] = 0
                     self.press_counts[self.lever2.name] = 0
 
+    def set_relay(self, lever_name: str, set_out_open: bool) -> None:
+        params = self.relay_output_params[lever_name]
+        adu = ADU200.get_instance()
+        pin = params["RelayOutputPin"]
+        if pin is None or not isinstance(pin, int) or pin < 0:
+            return
+        adu.set_relay(pin, set_open=set_out_open)
+    
+    
     def should_end_traning(self) -> bool:
         if self.should_end:
             print("Timed out!")
