@@ -1,5 +1,5 @@
 from typing import Callable, Optional, Dict
-import ADU200
+from ADU200 import ADU200
 from Events.LeverStateChangedEvent import LeverStateChangedEvent
 from Training import Training
 import time
@@ -263,6 +263,11 @@ class RatioTraining(Training):
     def set_relay(self, lever_name: str, relay_on: bool) -> None:
         params = self.relay_output_params[lever_name]
         adu = ADU200.get_instance()
+
+        if adu is None:
+            print("ADU200 instance not available. Cannot set relay.")
+            return
+
         pin = params["RelayOutputPin"]
         if pin is None or not isinstance(pin, int) or pin < 0:
             return
