@@ -245,7 +245,7 @@ class RatioTraining(Training):
                         cfg["ratio"] *= cfg["step"]
 
                 print("Resumed levers after ITI")
-                self.set_relay(lever_name, False) # Set relay output to be off after ITI period
+                self.set_relay(self.lever_to_modify, False) # Set relay output to be off after ITI period
 
 
         else:
@@ -271,13 +271,12 @@ class RatioTraining(Training):
             return
 
         pin = params["RelayOutputPin"]
+        on_value = params["OnValue"]
         if pin is None or not isinstance(pin, int) or pin < 0:
             return
         if relay_on:
-            on_value = params["OnValue"]
             adu.set_relay(pin, set_open=(on_value))
         else:
-            on_value = params["OnValue"]
             adu.set_relay(pin, set_open=(not on_value))
     
     
