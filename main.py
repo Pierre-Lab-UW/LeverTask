@@ -45,8 +45,8 @@ training_class_name: str = params_param_file.get('TaskName', {}).get('actual', '
 
 #CODE HERE
 
-lever_1:LeverBase = SwitchLever(lever_1_name, 0, 0)
-lever_2:LeverBase = SwitchLever(lever_2_name, 3, 1)
+lever_1:LeverBase = SwitchLever(lever_1_name, 0)
+lever_2:LeverBase = SwitchLever(lever_2_name, 3)
 
 # add a debug event for helpful logging
 lever_1.add_event(DebugEvent("debug", lever_1))
