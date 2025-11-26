@@ -275,10 +275,10 @@ class RatioTraining(Training):
             return
         if relay_on:
             on_value = params["OnValue"]
-            adu.set_relay(pin, set_open=(on_value == 0))
+            adu.set_relay(pin, set_open=(on_value))
         else:
             on_value = params["OnValue"]
-            adu.set_relay(pin, set_open=(on_value != 0))
+            adu.set_relay(pin, set_open=(not on_value))
     
     
     def should_end_traning(self) -> bool:

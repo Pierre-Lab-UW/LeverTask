@@ -23,9 +23,9 @@ parameters:
     description: Logical name/type for the output (for documentation)
     type: str
   Lev1_OnValue:
-    actual: 1
-    default: 1
-    type: int
+    actual: true
+    default: true
+    type: bool
   Lev1_Schedule:
     actual: Fixed
     default: Fixed
@@ -48,9 +48,9 @@ parameters:
     description: Logical name/type for the output (for documentation)
     type: str
   Lev2_OnValue:
-    actual: 1
-    default: 1
-    type: int
+    actual: true
+    default: true
+    type: bool
   Lev2_Active:
     actual: true
     default: false
