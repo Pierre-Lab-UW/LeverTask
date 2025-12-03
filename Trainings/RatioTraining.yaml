@@ -8,10 +8,24 @@ parameters:
     default: 3
     type: int
   Lev1_Iteration:
-    actual: 2
+    actual: 1
     default: 100
     description: Number of trials for Lever 1
     type: int
+  Lev1_RelayOutputPin:
+    actual: 0
+    default: 0
+    description: ADU200 relay pin used to drive the stimulus output
+    type: int
+  Lev1_RelayOutputType:
+    actual: Relay
+    default: Relay
+    description: Logical name/type for the output (for documentation)
+    type: str
+  Lev1_OnValue:
+    actual: true
+    default: true
+    type: bool
   Lev1_Schedule:
     actual: Fixed
     default: Fixed
@@ -21,13 +35,22 @@ parameters:
     - Geometric
     type: dropdown
   Lev1_StartingRatio:
-    actual: 2
+    actual: 1
     default: 1
     type: int
   Lev1_Timeout:
     actual: 40
     default: 10
     type: int
+  Lev2_RelayOutputType:
+    actual: Relay
+    default: Relay
+    description: Logical name/type for the output (for documentation)
+    type: str
+  Lev2_OnValue:
+    actual: true
+    default: true
+    type: bool
   Lev2_Active:
     actual: true
     default: false
@@ -40,6 +63,11 @@ parameters:
     actual: 2
     default: 100
     description: Number of trials for Lever 2
+    type: int
+  Lev2_RelayOutputPin:
+    actual: 0
+    default: 0
+    description: ADU200 relay pin used to drive the stimulus output
     type: int
   Lev2_Schedule:
     actual: Progressive
@@ -60,4 +88,10 @@ parameters:
   TaskName:
     actual: RatioTraining
     default: RatioTraining
+    hidden: true
     type: str
+  runnable:
+    actual: false
+    default: true
+    hidden: true
+    type: bool

@@ -1,3 +1,5 @@
+import importlib
+import sys
 from LeverBase import LeverBase
 from typing import Dict
 import yaml
@@ -23,6 +25,14 @@ class Training:
         with open(params_yaml_path, 'r') as f:
             yaml_data = yaml.safe_load(f)
         # Use 'actual' value if present, else 'default'
+
+        #check if yaml data exists
+        if yaml_data is None:
+            raise ValueError(f"No data found in {params_yaml_path}")
+
+        #check if 'parameters' key exists in yaml_data to avoid KeyError
+        if 'parameters' not in yaml_data:
+            raise KeyError(f"'parameters' key not found in {params_yaml_path}")
         self.params = {k: v.get('actual', v.get('default')) for k, v in yaml_data['parameters'].items()}
 
         with open(global_params_yaml_path, 'r') as f:
@@ -83,3 +93,4 @@ class Training:
                 Whether or not the program should end.
         '''
         return (time.time() - self.start_time) > self.get_global_param("SessionLength", 60)*60
+

@@ -16,9 +16,13 @@ class ADU200:
 
     @classmethod
     def get_instance(cls) -> "ADU200":
-        if cls._instance is None:
-            cls._instance = ADU200()
-        return cls._instance
+        try:
+            if cls._instance is None:
+                cls._instance = ADU200()
+            return cls._instance
+        except Exception as e:
+            print(f"Error getting ADU200 instance: {e}")
+            return None
 
     def connect(self) -> None:
         try:
