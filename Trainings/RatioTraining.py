@@ -173,7 +173,8 @@ class RatioTraining(Training):
                 # ratio requirement met -> reward + cooldown
                 reward_flag = 1
 
-                self.press_counts[self.get_lever_by_name(lever_name)] = 0
+                for lever in self.press_counts.keys():    
+                    self.press_counts[lever] = 0
 
                 self.get_lever_by_name(lever_name).set_is_active(False)
                 self.lever_params[lever_name]["last_reward_time"] = time.time()
