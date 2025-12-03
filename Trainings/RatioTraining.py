@@ -73,11 +73,11 @@ class RatioTraining(Training):
             },
         }
 
-        if self.lever_params[self.lever1.name]["schedule"] == "Fixed":
-            self.lever_params[self.lever1.name]["ratio"] = self.lever_params[self.lever1.name]["step"]
+        # if self.lever_params[self.lever1.name]["schedule"] == "Fixed":
+        #     self.lever_params[self.lever1.name]["ratio"] = self.lever_params[self.lever1.name]["step"]
 
-        if self.lever_params[self.lever2.name]["schedule"] == "Fixed":
-            self.lever_params[self.lever2.name]["ratio"] = self.lever_params[self.lever2.name]["step"]
+        # if self.lever_params[self.lever2.name]["schedule"] == "Fixed":
+        #     self.lever_params[self.lever2.name]["ratio"] = self.lever_params[self.lever2.name]["step"]
         self.output_data_file = f"OutputData/{self.get_global_param('Subject')}_RatioTraining_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         self.lever_to_modify = ''
 
@@ -238,12 +238,12 @@ class RatioTraining(Training):
                     if lever_name != self.lever_to_modify:
                         continue
                     if cfg["schedule"] == "Fixed":
-                        cfg["ratio"] = cfg["step"]
+                        cfg["ratio"] = cfg["base_ratio"]
                     elif cfg["schedule"] == "Progressive":
                         cfg["ratio"] += cfg["step"]
                     elif cfg["schedule"] == "Geometric":
                         cfg["ratio"] *= cfg["step"]
-
+        
                 print("Resumed levers after ITI")
                 self.set_relay(self.lever_to_modify, False) # Set relay output to be off after ITI period
 
