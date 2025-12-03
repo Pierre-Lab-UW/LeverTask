@@ -282,5 +282,7 @@ class RatioTraining(Training):
     
     def should_end_traning(self) -> bool:
         if self.should_end:
-            print("Timed out!")
+            print("Timed out! Lever press timeout reached.")
+        if super().should_end_traning():
+            print("Session duration exceeded.")
         return self.should_end or super().should_end_traning()
