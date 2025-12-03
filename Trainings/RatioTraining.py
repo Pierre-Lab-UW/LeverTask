@@ -174,7 +174,8 @@ class RatioTraining(Training):
                 reward_flag = 1
 
                 for lever in self.press_counts.keys():    
-                    self.press_counts[lever] = 0
+                    if lever == lever_name:
+                        self.press_counts[lever] = 0
 
                 self.get_lever_by_name(lever_name).set_is_active(False)
                 self.lever_params[lever_name]["last_reward_time"] = time.time()
