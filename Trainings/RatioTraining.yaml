@@ -13,7 +13,7 @@ parameters:
     description: Number of trials for Lever 1
     type: int
   Lev1_OnValue:
-    actual: true
+    actual: false
     default: true
     type: bool
   Lev1_RelayOutputPin:
@@ -52,7 +52,7 @@ parameters:
     description: Number of trials for Lever 2
     type: int
   Lev2_OnValue:
-    actual: true
+    actual: false
     default: true
     type: bool
   Lev2_RelayOutputPin:
