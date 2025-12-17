@@ -1,2 +1,3 @@
 pygame
+bluetooth
 Mock.GPIO
