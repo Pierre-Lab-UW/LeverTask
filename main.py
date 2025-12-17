@@ -44,9 +44,11 @@ training_class_name: str = params_param_file.get('TaskName', {}).get('actual', '
 
 
 #CODE HERE
+lever1_pin: int = params.get("Lever1_Relay_Port").get('actual', -1)
+lever2_pin: int = params.get("Lever2_Relay_Port").get('actual', -1)
 
-lever_1:LeverBase = SwitchLever(lever_1_name, 0)
-lever_2:LeverBase = SwitchLever(lever_2_name, 3)
+lever_1:LeverBase = SwitchLever(lever_1_name, lever1_pin)
+lever_2:LeverBase = SwitchLever(lever_2_name, lever2_pin)
 
 # add a debug event for helpful logging
 lever_1.add_event(DebugEvent("debug", lever_1))

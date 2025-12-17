@@ -59,8 +59,8 @@ class RatioTraining(Training):
                 "step": self.get_param("Lev1_Iteration"),
                 "schedule": self.get_param("Lev1_Schedule"),
                 "iti": self.get_param("Lev1_ITI"),
-                "timeout": self.get_param("Lev1_Timeout"),
-                "relay_output_params": self.relay_output_params[self.lever1.name]
+                "relay_output_params": self.relay_output_params[self.lever1.name],
+                "last_reward_time": 0
             },
             self.lever2.name: {
                 "ratio": self.get_param("Lev2_StartingRatio"),
@@ -68,18 +68,19 @@ class RatioTraining(Training):
                 "step": self.get_param("Lev2_Iteration"),
                 "schedule": self.get_param("Lev2_Schedule"),
                 "iti": self.get_param("Lev2_ITI"),
-                "timeout": self.get_param("Lev2_Timeout"),
-                "relay_output_params": self.relay_output_params[self.lever2.name]
+                "relay_output_params": self.relay_output_params[self.lever2.name],
+                "last_reward_time": 0
             },
         }
 
-        # if self.lever_params[self.lever1.name]["schedule"] == "Fixed":
-        #     self.lever_params[self.lever1.name]["ratio"] = self.lever_params[self.lever1.name]["step"]
-
-        # if self.lever_params[self.lever2.name]["schedule"] == "Fixed":
-        #     self.lever_params[self.lever2.name]["ratio"] = self.lever_params[self.lever2.name]["step"]
         self.output_data_file = f"OutputData/{self.get_global_param('Subject')}_RatioTraining_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        self.lever_to_modify = ''
+
+    def get_lever_by_name(self, name: str) -> Optional[LeverBase]:
+        if self.lever1.name == name:
+            return self.lever1
+        elif self.lever2.name == name:
+            return self.lever2
+        raise Exception(f"Lever with name {name} not found.");
 
     def create_timestamped_csv(self):
         if not os.path.exists("OutputData"):
@@ -173,12 +174,11 @@ class RatioTraining(Training):
                 reward_flag = 1
 
                 for lever in self.press_counts.keys():    
-                    self.press_counts[lever] = 0
+                    if lever == lever_name:
+                        self.press_counts[lever] = 0
 
-                self.lever1.set_is_active(False)
-                self.lever2.set_is_active(False)
-                self.lever_to_modify = lever_name
-                self.last_reset_time = time.time()
+                self.get_lever_by_name(lever_name).set_is_active(False)
+                self.lever_params[lever_name]["last_reward_time"] = time.time()
                 self.set_relay(lever_name, True) # Set relay output to be on for reward
                 print(f"Rewarded on {lever_name} press. Starting ITI cooldown.")
 
@@ -221,45 +221,39 @@ class RatioTraining(Training):
         self.lever2.events.clear()
 
     def update(self):
-        now = time.time()
+        now: float = time.time()
 
-        if not self.lever1.active and not self.lever2.active:
-            # check ITI cooldown
-            elapsed = now - self.last_reset_time
-            if elapsed > min(self.lever_params[self.lever1.name]["iti"],
-                             self.lever_params[self.lever2.name]["iti"]):
-                if self.get_param("Lev1_Active"):
-                    self.lever1.set_is_active(True)
-                if self.get_param("Lev2_Active"):
-                    self.lever2.set_is_active(True)
+        for lever_name, cfg in self.lever_params.items():
+            lever: LeverBase = self.get_lever_by_name(lever_name)
+            
+            if lever is None or lever.active:
+                continue
+            
+            elapsed = now - cfg["last_reward_time"]
+            if elapsed > cfg["iti"]:
+                if self.get_param(f"{lever_name}_Active", True):
+                    lever.set_is_active(True)
                 self.last_lever_press_time = time.time()
-                # update ratios per lever depending on schedule
-                for lever_name, cfg in self.lever_params.items():
-                    if lever_name != self.lever_to_modify:
-                        continue
-                    if cfg["schedule"] == "Fixed":
-                        cfg["ratio"] = cfg["base_ratio"]
-                    elif cfg["schedule"] == "Progressive":
-                        cfg["ratio"] += cfg["step"]
-                    elif cfg["schedule"] == "Geometric":
-                        cfg["ratio"] *= cfg["step"]
-        
-                print("Resumed levers after ITI")
-                self.set_relay(self.lever_to_modify, False) # Set relay output to be off after ITI period
+                # update ratio if needed
+                if cfg["schedule"] == "Fixed":
+                    cfg["ratio"] = cfg["base_ratio"]
+                elif cfg["schedule"] == "Progressive":
+                    cfg["ratio"] += cfg["step"]
+                elif cfg["schedule"] == "Geometric":
+                    cfg["ratio"] *= cfg["step"]
 
+                print(f"Resumed lever {lever_name} after ITI")
+                self.set_relay(lever_name, False) # Set relay output to be off after ITI period
 
-        else:
-            # timeout check
-            flag = now - self.last_lever_press_time > max(
-                self.lever_params[self.lever1.name]["timeout"],
-                self.lever_params[self.lever2.name]["timeout"]
-            )
-            if self.lever1.get_state() != 1 and self.lever2.get_state() != 1:
-                self.should_end = flag
-                if flag:
-                    # reset counters after timeout
-                    self.press_counts[self.lever1.name] = 0
-                    self.press_counts[self.lever2.name] = 0
+        # timeout check
+        flag = now - self.last_lever_press_time > self.get_param("Session_LeverPressTimeout", 300) 
+    
+        if self.lever1.get_state() != 1 and self.lever2.get_state() != 1:
+            self.should_end = flag
+            if flag:
+                # reset counters after timeout
+                self.press_counts[self.lever1.name] = 0
+                self.press_counts[self.lever2.name] = 0
                 
 
     def set_relay(self, lever_name: str, relay_on: bool) -> None:

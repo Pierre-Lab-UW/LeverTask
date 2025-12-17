@@ -28,11 +28,21 @@ parameters:
     default: Lever1
     description: Lever2 Name
     type: str
+  Lever1_Relay_Port:
+    actual: 1
+    default: 1
+    description: Relay Port that Lever 1 is connected to.
+    type: int
   Lever2Name:
     actual: Lever2
     default: Lever2
     description: Lever2 Name
     type: str
+  Lever2_Relay_Port:
+    actual: 3
+    default: 3
+    description: Relay Port that Lever 2 is connected to.
+    type: int
   NumberOfTrials:
     actual: 100
     default: 100
