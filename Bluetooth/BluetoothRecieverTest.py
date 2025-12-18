@@ -1,40 +1,45 @@
 import bluetooth
 
-# Create RFCOMM server socket
-server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+PORT = bluetooth.PORT_ANY
+BACKLOG = 1
+BUFFER_SIZE = 1024
 
-# Bind to any available port
-server_sock.bind(("", bluetooth.PORT_ANY))
-server_sock.listen(1)
+def run_server():
+    server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+    server_sock.bind(("", PORT))
+    server_sock.listen(BACKLOG)
 
-port = server_sock.getsockname()[1]
+    port = server_sock.getsockname()[1]
 
-print(f"Listening for Bluetooth connections on RFCOMM channel {port}")
+    bluetooth.advertise_service(
+        server_sock,
+        "BluetoothStringReceiver",
+        service_classes=[bluetooth.SERIAL_PORT_CLASS],
+        profiles=[bluetooth.SERIAL_PORT_PROFILE],
+    )
 
-# Advertise service so devices can discover it
-bluetooth.advertise_service(
-    server_sock,
-    "BluetoothStringReceiver",
-    service_classes=[bluetooth.SERIAL_PORT_CLASS],
-    profiles=[bluetooth.SERIAL_PORT_PROFILE],
-)
+    print(f"Listening on RFCOMM channel {port}")
 
-# Wait for a connection
-client_sock, client_info = server_sock.accept()
-print(f"Accepted connection from {client_info}")
-
-try:
     while True:
-        data = client_sock.recv(1024)
-        if not data:
-            break
+        print("Waiting for connection...")
+        client_sock, client_info = server_sock.accept()
+        print(f"Connected to {client_info}")
 
-        # Decode and print received string
-        print("Received:", data.decode(errors="ignore"))
+        try:
+            while True:
+                data = client_sock.recv(BUFFER_SIZE)
+                if not data:
+                    print("Client disconnected")
+                    break
 
-except KeyboardInterrupt:
-    print("\nClosing connection")
+                print("Received:", data.decode(errors="ignore"))
 
-finally:
-    client_sock.close()
-    server_sock.close()
+        except OSError as e:
+            print("Connection error:", e)
+
+        finally:
+            client_sock.close()
+            print("Connection closed\n")
+
+if __name__ == "__main__":
+    run_server()
