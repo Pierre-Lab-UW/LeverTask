@@ -32,5 +32,10 @@ import bluetooth
 import serial
 
 ser = serial.Serial("COM7", 115200)
-ser.write(b"hello from tablet\n")
+ser.write(b"Global File: \n")
+ser.write(b"yes\n")
+ser.write(b"Training File: \n")
+ser.write(b"yes\n")
+
+
 ser.close()
