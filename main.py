@@ -11,6 +11,7 @@ import os
 # Command line arguments: training class name, parameter file
 if len(sys.argv) < 2:
     print("Usage: python main.py <GlobalParamFile>")
+    print("Usage(With training file): python main.py <GlobalParamFile> -f <TrainingParamFile>")
     sys.exit(1)
 
 global_param_file: str = sys.argv[1]
@@ -27,7 +28,15 @@ with open(global_param_file, 'r') as f:
 params = data.get('parameters', {})
 
 # Extract individual parameter values (using "actual" field)
-param_file: str = params.get('training_param_file', {}).get('actual', '')
+param_file: str = None 
+
+if len(sys.argv) == 2:
+    param_file: str = params.get('training_param_file', {}).get('actual', '')
+elif len(sys.argv) >= 3:
+    param_file: str = sys.argv[2]
+else:
+    print("ERROR: Inalid arguments!")
+
 lever_1_name: str = params.get('Lever1Name', {}).get('actual', '')
 lever_2_name: str = params.get('Lever2Name', {}).get('actual', '')
 
