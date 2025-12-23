@@ -128,7 +128,7 @@ class BluetoothReceiver:
                                 client_sock.sendall(b"ERROR: No training id sent!\n")
                                 continue
                             
-                            training_id = parts[3]
+                            training_id = parts[2]
                             if not os.path.isdir(os.path.join(self.BASE_RX_DIR, training_id)):
                                 client_sock.sendall(b"ERROR: Invalid Training ID of "+str(training_id)+"!\n")
                                 continue
