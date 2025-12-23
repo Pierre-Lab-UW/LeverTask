@@ -83,6 +83,10 @@ def main():
             elif parts[0].lower() == "request" and len(parts) == 3:
                 request_file(ser, parts[1], parts[2])
 
+            elif parts[0].lower() == "start" and len(parts) == 2:
+                cmd = f"CMD START {parts[1]}\n"
+                ser.write(cmd.encode())
+
             elif parts[0].lower() == "quit":
                 print("Exiting...")
                 break
