@@ -1,6 +1,8 @@
 import bluetooth
 import os
 import shutil
+import subprocess
+
 
 class BluetoothReceiver:
     PORT = bluetooth.PORT_ANY
@@ -75,6 +77,9 @@ class BluetoothReceiver:
 
     def should_recieve_file(self) -> bool:
         return True
+    
+    def process_commands(self) -> bool:
+        pass
 
     def run_server(self):
         server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
@@ -115,12 +120,25 @@ class BluetoothReceiver:
                             self.handle_request(client_sock, parts)
 
                         elif parts == ["CMD", "DONE"]:
-                            self.state = self.STATE_IDLE
                             print("Training complete")
                             client_sock.sendall(b"SUCCESS\n")
-
+                        
+                        elif parts[:2] == ["CMD", "START"]:
+                            if len(parts) < 3:
+                                client_sock.sendall(b"ERROR: No training id sent!\n")
+                                continue
+                            
+                            training_id = parts[3]
+                            if not os.path.isdir(os.path.join(self.BASE_RX_DIR, training_id)):
+                                client_sock.sendall(b"ERROR: Invalid Training ID of "+str(training_id)+"!\n")
+                                continue
+                            
+                            command = ["python", "../main.py", "GlobalParameters.yaml", "RatioTraining.yaml"]
+                            subprocess.Popen(command, shell=True) 
+                            client_sock.sendall(b"Training Successfully Started!\n")
                         else:
                             client_sock.sendall(b"FAIL\n")
+                        
 
             except Exception as e:
                 print("Connection error:", e)
