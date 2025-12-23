@@ -135,7 +135,7 @@ class BluetoothReceiver:
                                 continue
                             
                             #command = ["python", "../main.py", "GlobalParameters.yaml", "RatioTraining.yaml"]
-                            command = "python ../main.py "+os.path.join(training_files_path, "GlobalParameters.yaml") + " "+os.path.join(training_files_path, "RatioTraining.yaml")
+                            command = "python main.py "+os.path.join(training_files_path, "GlobalParameters.yaml") + " "+os.path.join(training_files_path, "RatioTraining.yaml")
                             subprocess.Popen(command, shell=True) 
                             client_sock.sendall(b"Training Successfully Started!\n")
                         else:
