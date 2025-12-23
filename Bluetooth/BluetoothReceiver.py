@@ -131,18 +131,20 @@ class BluetoothReceiver:
                             training_id = parts[2]
                             training_files_path = os.path.join(self.BASE_RX_DIR, training_id)
                             if not os.path.isdir(training_files_path):
-                                client_sock.sendall(b"ERROR: Invalid Training ID of "+str(training_id)+"!\n")
+                                err_msg = "ERROR: Invalid Training ID of "+str(training_id).encode()+"!\n"
+                                client_sock.sendall(err_msg.encode())
                                 continue
                             
                             #command = ["python", "../main.py", "GlobalParameters.yaml", "RatioTraining.yaml"]
-                            command = [
-                                "cmd", "/k",
-                                "python", "main.py",
+                            subprocess.Popen([
+                                "gnome-terminal",
+                                "--",
+                                "python3",
+                                "main.py",
                                 os.path.join(training_files_path, "GlobalParameters.yaml"),
                                 os.path.join(training_files_path, "RatioTraining.yaml"),
-                            ]
+                            ])
 
-                            subprocess.Popen(command)
                             client_sock.sendall(b"Training Successfully Started!\n")
                         else:
                             client_sock.sendall(b"FAIL\n")
