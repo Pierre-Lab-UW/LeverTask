@@ -79,8 +79,10 @@ class ADU200:
         return result_str if result_str else None
 
     def get_port_status(self, port: int) -> Optional[int]:
+        print(f"Getting port status for port {port}")
         self.write('RPA'+str(port))
         data = self.read()
+        print(f"Received data: {data}")
         if data is not None:
             try:
                 return int(data)
