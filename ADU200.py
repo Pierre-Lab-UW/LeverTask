@@ -37,7 +37,7 @@ class ADU200:
             # Clear any existing data in the buffer
             timer = time.time()
             while time.time() - timer < 200:  # 200 ms timeout
-                data = self.device.read() # Read data
+                data = self.read() # Read data
                 if not data:
                     break # Buffer is empty
 
