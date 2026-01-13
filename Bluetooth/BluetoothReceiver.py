@@ -137,8 +137,6 @@ class BluetoothReceiver:
                             
                             #command = ["python", "../main.py", "GlobalParameters.yaml", "RatioTraining.yaml"]
                             subprocess.Popen([
-                                "lxterminal",
-                                "-e",
                                 "python3",
                                 "main.py",
                                 os.path.join(training_files_path, "GlobalParameters.yaml"),
