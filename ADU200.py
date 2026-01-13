@@ -1,6 +1,8 @@
 import hid
 from typing import Optional, Union
 
+from zmq import device
+
 class ADU200:
     _instance: Optional["ADU200"] = None
 
@@ -13,6 +15,8 @@ class ADU200:
         self.device: Optional[hid.device] = None
         self.connect()
         ADU200._instance = self
+
+        
 
     @classmethod
     def get_instance(cls) -> "ADU200":
@@ -29,6 +33,12 @@ class ADU200:
             self.device = hid.device()
             self.device.open(self.vendor_id, self.product_id)
             print(f'Connected to ADU{self.product_id:02X}')
+
+            while True:
+                data = self.device.read(timeout=100) # Read with a short timeout
+                if not data:
+                    break # Buffer is empty
+
         except IOError as e:
             print(f'Error opening device: {e}')
             self.device = None
@@ -129,8 +139,7 @@ if __name__ == "__main__":
             port_status = adu.read_port_register()
             print(f"Port status: {port_status}")
             time.sleep(1)
-    except KeyboardInterrupt:
-        adu.disconnect()
+            
     except Exception as e:
         print(f"An error occurred: {e}")
     
