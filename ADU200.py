@@ -34,8 +34,10 @@ class ADU200:
             self.device.open(self.vendor_id, self.product_id)
             print(f'Connected to ADU{self.product_id:02X}')
 
-            while True:
-                data = self.device.read(timeout=100) # Read with a short timeout
+            # Clear any existing data in the buffer
+            timer = time.time()
+            while time.time() - timer < 200:  # 200 ms timeout
+                data = self.device.read() # Read data
                 if not data:
                     break # Buffer is empty
 
