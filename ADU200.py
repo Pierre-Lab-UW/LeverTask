@@ -1,6 +1,6 @@
 import hid
 from typing import Optional, Union
-
+import time
 from zmq import device
 
 class ADU200:
