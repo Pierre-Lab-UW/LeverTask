@@ -1,7 +1,7 @@
 import socket
 
 client = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-client.connect(("00:1A:7D:DA:71:13", 1))  # Replace with server MAC address and port
+client.connect(("B8:27:EB:7E:6F:9D", 4))  # Replace with server MAC address and port
 
 try:
     while True:
