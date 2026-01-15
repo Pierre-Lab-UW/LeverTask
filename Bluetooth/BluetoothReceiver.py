@@ -111,6 +111,7 @@ class BluetoothReceiver:
 
                     while b"\n" in buffer:
                         line, buffer = buffer.split(b"\n", 1)
+                        print("Received command:", line)
                         parts = line.decode().strip().split()
 
                         if parts[:2] == ["CMD", "SEND"]:
