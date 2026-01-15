@@ -1,5 +1,7 @@
 import hid
 from typing import Optional, Union
+import time
+from zmq import device
 
 class ADU200:
     _instance: Optional["ADU200"] = None
@@ -13,6 +15,8 @@ class ADU200:
         self.device: Optional[hid.device] = None
         self.connect()
         ADU200._instance = self
+
+        
 
     @classmethod
     def get_instance(cls) -> "ADU200":
@@ -29,6 +33,14 @@ class ADU200:
             self.device = hid.device()
             self.device.open(self.vendor_id, self.product_id)
             print(f'Connected to ADU{self.product_id:02X}')
+
+            # Clear any existing data in the buffer
+            timer = time.time()
+            while time.time() - timer < 200:  # 200 ms timeout
+                data = self.read() # Read data
+                if not data:
+                    break # Buffer is empty
+
         except IOError as e:
             print(f'Error opening device: {e}')
             self.device = None
@@ -79,7 +91,19 @@ class ADU200:
         return result_str if result_str else None
 
     def get_port_status(self, port: int) -> Optional[int]:
+        # print(f"Getting port status for port {port}")
         self.write('RPA'+str(port))
+        data = self.read()
+        # print(f"Received data: {data}")
+        if data is not None:
+            try:
+                return int(data)
+            except ValueError:
+                print(f"Invalid data received: {data}")
+        return None
+
+    def read_port_register(self):
+        self.write('RPA')
         data = self.read()
         if data is not None:
             try:
@@ -112,5 +136,13 @@ if __name__ == "__main__":
             adu.set_relay(0, set_open=True)
             adu.set_relay(1, set_open=True)
             time.sleep(2)
-    finally:
-        adu.disconnect()
+        
+        while True:
+            port_status = adu.read_port_register()
+            print(f"Port status: {port_status}")
+            time.sleep(1)
+            
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
+    

@@ -136,7 +136,12 @@ class RatioTraining(Training):
         lever_cfg = self.lever_params[lever_name]
 
         print(f"Lever {lever_name} state changed to {new_state} after {time_since_last_change:.3f} seconds")
-
+        
+        adu = ADU200.get_instance()
+        if adu is not None:
+            port_status = adu.read_port_register()
+            print(f"Port status: {port_status}")
+        
         if new_state == 1:  # pressed down
             self.last_lever_press_time = time.time()
             self.press_counts[lever_name] += 1
