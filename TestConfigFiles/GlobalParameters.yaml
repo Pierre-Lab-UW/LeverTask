@@ -1,0 +1,110 @@
+parameters:
+  Cage:
+    actual: C000
+    default: C000
+    description: Cage identifier
+    type: str
+  ExternalOutput:
+    actual: Light
+    default: Light
+    description: Type of external output
+    options:
+    - Light
+    - Buzzers
+    - Scent
+    type: dropdown
+  Housing:
+    actual: Group
+    default: Group
+    description: The housing group of the monkey.
+    type: str
+  ID:
+    actual: r99999
+    default: r99999
+    description: Subject ID number
+    type: str
+  Lever1Name:
+    actual: Lever1
+    default: Lever1
+    description: Lever2 Name
+    type: str
+  Lever1_Relay_Port:
+    actual: 0
+    default: 1
+    description: Relay Port that Lever 1 is connected to.
+    type: int
+  Lever2Name:
+    actual: Lever2
+    default: Lever2
+    description: Lever2 Name
+    type: str
+  Lever2_Relay_Port:
+    actual: 2
+    default: 2
+    description: Relay Port that Lever 2 is connected to.
+    type: int
+  NumberOfTrials:
+    actual: 100
+    default: 100
+    description: Number of trials in session
+    type: int
+  Obs:
+    actual: mr
+    default: mr
+    description: null
+    type: str
+  PiSystem:
+    actual: '000'
+    default: ''
+    description: Pi system identifier
+    type: str
+  RFID:
+    actual: '982091073731607'
+    default: 982091073731607
+    description: RFID of the monkey doing the task.
+    type: str
+  SessionDuration:
+    actual: 10.0
+    default: 60.0
+    description: Session length in minutes
+    type: float
+  Sex:
+    actual: M
+    default: ''
+    description: Sex of the subject
+    type: str
+  Site:
+    actual: WNPRC
+    default: WNPRC
+    description: Site the experiment is being run on.
+    options:
+    - WNPRC
+    - Texas
+    - California
+    type: dropdown
+  StudyCode:
+    actual: bass2022
+    default: bass2022
+    description: The code for the study being done.
+    type: str
+  Subject:
+    actual: chimp0
+    default: default_subject
+    description: Subject identifier
+    type: str
+  TaskName:
+    actual: DefaultTraining
+    default: DefaultTraining
+    hidden: true
+    type: str
+  runnable:
+    actual: true
+    default: true
+    hidden: true
+    type: bool
+  training_param_file:
+    actual: C:/Users/siddh/OneDrive/Desktop/Coding/Work/LeverTask/Trainings/RatioTraining.yaml
+    default: ''
+    description: Path to the YAML parameter file for the 2 lever training (relative
+      to project or absolute)
+    type: file
