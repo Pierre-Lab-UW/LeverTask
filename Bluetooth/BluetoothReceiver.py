@@ -134,7 +134,7 @@ class BluetoothReceiver:
                                 err_msg = "ERROR: Invalid Training ID of "+str(training_id)+"!\n"
                                 client_sock.sendall(err_msg.encode())
                                 continue
-                            
+                            subprocess.run(["lxterminal"])
                             #command = ["python", "../main.py", "GlobalParameters.yaml", "RatioTraining.yaml"]
                             subprocess.Popen([
                                 "python3",
