@@ -1,3 +1,4 @@
+import time
 import bluetooth
 import os
 import shutil
@@ -15,15 +16,29 @@ class BluetoothReceiver:
     def __init__(self):
         pass
 
-    def safe_recv(self, sock, size):
-        """Receive exactly size bytes"""
+    def safe_recv(self, sock, size, timeout=10.0):
+        """
+        Receive exactly `size` bytes or raise TimeoutError.
+        timeout = max total seconds allowed for the transfer
+        """
+        sock.settimeout(1.0)  # short recv timeout so we can check elapsed time
         data = b""
+        start = time.monotonic()
+
         while len(data) < size:
-            chunk = sock.recv(min(self.BUFFER_SIZE, size - len(data)))
-            if not chunk:
-                raise ConnectionError("Client disconnected during transfer")
-            data += chunk
+            if time.monotonic() - start > timeout:
+                raise TimeoutError("safe_recv timed out: "+len(data)+"/"+size+" bytes received")
+
+            try:
+                chunk = sock.recv(min(self.BUFFER_SIZE, size - len(data)))
+                if not chunk:
+                    raise ConnectionError("Client disconnected during transfer")
+                data += chunk
+            except socket.timeout:
+                continue  # keep looping until total timeout expires
+
         return data
+
 
 
     def handle_send(self, sock, parts):

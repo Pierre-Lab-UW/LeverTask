@@ -20,6 +20,7 @@ import socket
 import os
 import shutil
 import subprocess
+import time
 
 class BluetoothReceiver:
     BUFFER_SIZE = 1024
@@ -31,15 +32,29 @@ class BluetoothReceiver:
         self.mac_addr = mac_addr
         self.channel = channel
 
-    def safe_recv(self, sock, size):
-        """Receive exactly size bytes"""
+    def safe_recv(self, sock, size, timeout=10.0):
+        """
+        Receive exactly `size` bytes or raise TimeoutError.
+        timeout = max total seconds allowed for the transfer
+        """
+        sock.settimeout(1.0)  # short recv timeout so we can check elapsed time
         data = b""
+        start = time.monotonic()
+
         while len(data) < size:
-            chunk = sock.recv(min(self.BUFFER_SIZE, size - len(data)))
-            if not chunk:
-                raise ConnectionError("Client disconnected during transfer")
-            data += chunk
+            if time.monotonic() - start > timeout:
+                raise TimeoutError("safe_recv timed out: "+str(len(data))+"/"+str(size)+" bytes received")
+
+            try:
+                chunk = sock.recv(min(self.BUFFER_SIZE, size - len(data)))
+                if not chunk:
+                    raise ConnectionError("Client disconnected during transfer")
+                data += chunk
+            except socket.timeout:
+                continue  # keep looping until total timeout expires
+
         return data
+
 
     def recv_line(self, sock):
         """Receive until newline"""
@@ -107,7 +122,7 @@ class BluetoothReceiver:
             sock.sendall(f"ERROR: Invalid Training ID {training_id}!\n".encode())
             return
 
-        subprocess.run([
+        subprocess.Popen([
             "lxterminal", "--command",
             f"python3 main.py "
             f"{os.path.join(training_path, 'GlobalParameters.yaml')} "
