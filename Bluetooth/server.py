@@ -65,7 +65,7 @@ def handle_start(sock, parts):
     training_id = parts[2]
     path = os.path.join(BASE_RX_DIR, training_id)
 
-    if not os.path.isdir(path):
+    if not os.path.isdir(path) or not os.path.isfile(os.path.join(path, "GlobalParameters.yaml")) or not os.path.isfile(os.path.join(path, "RatioTraining.yaml")):
         sock.sendall(b"ERR\n")
         return
 
