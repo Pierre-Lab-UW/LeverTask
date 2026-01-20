@@ -1,139 +1,87 @@
-# import socket
-
-# client = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-# client.connect(("", 4))  # Replace with server MAC address and port
-
-# try:
-#     while True:
-#         message = input("Enter message to send: ")
-#         if message.lower() == "quit":
-#             break
-#         client.sendall(message.encode())
-#         data = client.recv(1024)
-#         print("Received:", data.decode())
-# except OSError as e:
-#     print("Connection error:", e)
 import socket
 import os
 
 BUFFER_SIZE = 1024
 
-def recv_line(sock):
-    """Receive until newline"""
+def recv_exact(sock, size):
     data = b""
-    while True:
-        chunk = sock.recv(1)
+    while len(data) < size:
+        chunk = sock.recv(size - len(data))
+        if not chunk:
+            raise ConnectionError("Connection lost")
+        data += chunk
+    return data
+
+def recv_line(sock):
+    buf = b""
+    while b"\n" not in buf:
+        chunk = sock.recv(256)
         if not chunk:
             raise ConnectionError("Connection closed")
-        if chunk == b"\n":
-            break
-        data += chunk
-    return data.decode().strip()
+        buf += chunk
+    return buf.partition(b"\n")[0].decode().strip()
 
+def send_file(sock, training_id, path):
+    filename = os.path.basename(path)
+    filesize = os.path.getsize(path)
 
-def send_file(sock, training_id, filepath):
-    if not os.path.isfile(filepath):
-        print("File does not exist:", filepath)
-        return
+    sock.sendall(f"CMD SEND {training_id} {filename} {filesize}\n".encode())
+    resp = recv_line(sock)
+    if resp != "READY":
+        raise RuntimeError(f"Server not ready: {resp}")
 
-    filename = os.path.basename(filepath)
-    filesize = os.path.getsize(filepath)
-
-    # Send header
-    header = f"CMD SEND {training_id} {filename} {filesize}\n"
-    sock.sendall(header.encode())
-
-    print(f"Sending file {filename} ({filesize} bytes)...")
-
-    with open(filepath, "rb") as f:
-        while True:
-            chunk = f.read(BUFFER_SIZE)
-            if not chunk:
-                break
+    with open(path, "rb") as f:
+        while chunk := f.read(BUFFER_SIZE):
             sock.sendall(chunk)
 
-    # Wait for acknowledgment
-    resp = recv_line(sock)
-    print("PI response:", resp)
-
+    print("Server:", recv_line(sock))
 
 def request_file(sock, filename, save_path):
     sock.sendall(f"CMD REQ {filename}\n".encode())
 
     header = recv_line(sock)
     parts = header.split()
-
-    if parts[:2] != ["CMD", "SEND"]:
-        print("Failed to request file:", header)
-        return
+    if parts[:3] != ["CMD", "SEND", "OUT"]:
+        raise RuntimeError(header)
 
     filesize = int(parts[4])
-    print(f"Receiving file {filename} ({filesize} bytes)...")
+    sock.sendall(b"READY\n")
 
-    received = 0
+    data = recv_exact(sock, filesize)
     with open(save_path, "wb") as f:
-        while received < filesize:
-            chunk = sock.recv(min(BUFFER_SIZE, filesize - received))
-            if not chunk:
-                raise ConnectionError("Connection lost")
-            f.write(chunk)
-            received += len(chunk)
+        f.write(data)
 
-    print(f"File saved to {save_path}")
-
+    print("File received:", save_path)
 
 def main():
-    server_mac = input("Enter Bluetooth MAC address: ").strip()
-    channel = int(input("Enter RFCOMM channel (e.g., 4): "))
+    mac = input("MAC: ").strip()
+    channel = int(input("Channel: "))
 
-    client = socket.socket(
-        socket.AF_BLUETOOTH,
-        socket.SOCK_STREAM,
-        socket.BTPROTO_RFCOMM
-    )
+    sock = socket.socket(socket.AF_BLUETOOTH,
+                         socket.SOCK_STREAM,
+                         socket.BTPROTO_RFCOMM)
+    sock.settimeout(10)
+    sock.connect((mac, channel))
 
-    try:
-        client.connect((server_mac, channel))
-    except OSError as e:
-        print("Failed to connect:", e)
-        return
+    while True:
+        cmd = input("> ").strip().split()
+        if not cmd:
+            continue
 
-    print("Connected. Enter commands:")
-    print("  send <training_id> <file_path>")
-    print("  request <filename> <save_path>")
-    print("  start <training_id>")
-    print("  quit")
+        if cmd[0] == "send" and len(cmd) == 3:
+            send_file(sock, cmd[1], cmd[2])
 
-    try:
-        while True:
-            cmd = input("> ").strip()
-            if not cmd:
-                continue
+        elif cmd[0] == "request" and len(cmd) == 3:
+            request_file(sock, cmd[1], cmd[2])
 
-            parts = cmd.split()
+        elif cmd[0] == "start" and len(cmd) == 2:
+            sock.sendall(f"CMD START {cmd[1]}\n".encode())
+            print(recv_line(sock))
 
-            if parts[0].lower() == "send" and len(parts) == 3:
-                send_file(client, parts[1], parts[2])
+        elif cmd[0] == "quit":
+            break
 
-            elif parts[0].lower() == "request" and len(parts) == 3:
-                request_file(client, parts[1], parts[2])
-
-            elif parts[0].lower() == "start" and len(parts) == 2:
-                client.sendall(f"CMD START {parts[1]}\n".encode())
-
-            elif parts[0].lower() == "quit":
-                break
-
-            else:
-                print("Unknown command or wrong number of arguments.")
-
-    except (OSError, ConnectionError) as e:
-        print("Connection error:", e)
-
-    finally:
-        client.close()
-        print("Disconnected.")
-
+    sock.close()
 
 if __name__ == "__main__":
     main()
