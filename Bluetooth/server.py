@@ -70,7 +70,7 @@ def handle_start(sock, parts):
         return
 
     subprocess.Popen([
-        "python3", "main.py",
+        "sudo python3", "main.py",
         os.path.join(path, "GlobalParameters.yaml"),
         os.path.join(path, "RatioTraining.yaml")
     ])
