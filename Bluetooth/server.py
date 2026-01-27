@@ -3,109 +3,122 @@ import os
 import shutil
 import subprocess
 
-BASE_RX_DIR = "/tmp/bluetooth_rx"
-OUTPUT_DIR = "/data/outputs"
 BUFFER_SIZE = 1024
 
-def recv_exact(sock, size):
-    data = b""
-    while len(data) < size:
-        chunk = sock.recv(size - len(data))
-        if not chunk:
-            raise ConnectionError("Client disconnected")
-        data += chunk
-    return data
+class BluetoothServer:
+    """Manages Bluetooth RFCOMM server for receiving and executing training configs."""
+    
+    def __init__(self, mac, channel=4, rx_dir="/tmp/bluetooth_rx", output_dir="/data/outputs"):
+        """Initialize Bluetooth server.
+        
+        Args:
+            mac: MAC address to bind to
+            channel: RFCOMM channel (default: 4)
+            rx_dir: Directory for received files (default: /tmp/bluetooth_rx)
+            output_dir: Directory for output files (default: /data/outputs)
+        """
+        self.mac = mac
+        self.channel = channel
+        self.rx_dir = rx_dir
+        self.output_dir = output_dir
+        self.server = None
+        self.running = False
+    
+    def _recv_exact(self, sock, size):
+        """Receive exact number of bytes."""
+        data = b""
+        while len(data) < size:
+            chunk = sock.recv(size - len(data))
+            if not chunk:
+                raise ConnectionError("Client disconnected")
+            data += chunk
+        return data
+    
+    def _recv_line(self, sock):
+        """Receive line (until newline)."""
+        buf = b""
+        while b"\n" not in buf:
+            chunk = sock.recv(256)
+            if not chunk:
+                raise ConnectionError("Client disconnected")
+            buf += chunk
+        return buf.partition(b"\n")[0].decode().strip()
+    
+    def _handle_send(self, sock, parts):
+        """Handle CMD SEND - receive file from client."""
+        _, _, training_id, filename, filesize = parts
+        filesize = int(filesize)
 
-def recv_line(sock):
-    buf = b""
-    while b"\n" not in buf:
-        chunk = sock.recv(256)
-        if not chunk:
-            raise ConnectionError("Client disconnected")
-        buf += chunk
-    return buf.partition(b"\n")[0].decode().strip()
+        train_dir = os.path.join(self.rx_dir, training_id)
+        os.makedirs(train_dir, exist_ok=True)
+        filepath = os.path.join(train_dir, os.path.basename(filename))
 
-def handle_send(sock, parts):
-    _, _, training_id, filename, filesize = parts
-    filesize = int(filesize)
+        sock.sendall(b"READY\n")
+        data = self._recv_exact(sock, filesize)
 
-    train_dir = os.path.join(BASE_RX_DIR, training_id)
-    os.makedirs(train_dir, exist_ok=True)
-    filepath = os.path.join(train_dir, os.path.basename(filename))
+        with open(filepath, "wb") as f:
+            f.write(data)
 
-    sock.sendall(b"READY\n")
-    data = recv_exact(sock, filesize)
+        sock.sendall(b"OK\n")
+        print("Received:", filepath)
+    
+    def _handle_request(self, sock, parts):
+        """Handle CMD REQ - send output file to client."""
+        _, _, filename = parts
+        path = os.path.join(self.output_dir, os.path.basename(filename))
 
-    with open(filepath, "wb") as f:
-        f.write(data)
+        if not os.path.isfile(path):
+            sock.sendall(b"ERR\n")
+            return
 
-    sock.sendall(b"OK\n")
-    print("Received:", filepath)
+        size = os.path.getsize(path)
+        sock.sendall(f"CMD SEND OUT {filename} {size}\n".encode())
 
-def handle_request(sock, parts):
-    _, _, filename = parts
-    path = os.path.join(OUTPUT_DIR, os.path.basename(filename))
+        if self._recv_line(sock) != "READY":
+            return
 
-    if not os.path.isfile(path):
-        sock.sendall(b"ERR\n")
-        return
+        with open(path, "rb") as f:
+            shutil.copyfileobj(f, sock)
 
-    size = os.path.getsize(path)
-    sock.sendall(f"CMD SEND OUT {filename} {size}\n".encode())
+        print("Sent:", filename)
+    
+    def _handle_start(self, sock, parts):
+        """Handle CMD START - start training on device."""
+        training_id = parts[2]
+        path = os.path.join(self.rx_dir, training_id)
 
-    if recv_line(sock) != "READY":
-        return
+        # Check if required files exist
+        if (not os.path.isdir(path) or 
+            not os.path.isfile(os.path.join(path, "GlobalParameters.yaml")) or 
+            not os.path.isfile(os.path.join(path, "RatioTraining.yaml"))):
+            sock.sendall(b"ERR\n")
+            return
 
-    with open(path, "rb") as f:
-        shutil.copyfileobj(f, sock)
+        # Start training process
+        subprocess.Popen([
+            "python3", "main.py",
+            os.path.join(path, "GlobalParameters.yaml"),
+            os.path.join(path, "RatioTraining.yaml")
+        ])
 
-    print("Sent:", filename)
-
-def handle_start(sock, parts):
-    training_id = parts[2]
-    path = os.path.join(BASE_RX_DIR, training_id)
-
-    if not os.path.isdir(path) or not os.path.isfile(os.path.join(path, "GlobalParameters.yaml")) or not os.path.isfile(os.path.join(path, "RatioTraining.yaml")):
-        sock.sendall(b"ERR\n")
-        return
-
-    subprocess.Popen([
-        "python3", "main.py",
-        os.path.join(path, "GlobalParameters.yaml"),
-        os.path.join(path, "RatioTraining.yaml")
-    ])
-
-    sock.sendall(b"OK\n")
-
-def run_server(mac, channel):
-    os.makedirs(BASE_RX_DIR, exist_ok=True)
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    server = socket.socket(socket.AF_BLUETOOTH,
-                           socket.SOCK_STREAM,
-                           socket.BTPROTO_RFCOMM)
-    server.bind((mac, channel))
-    server.listen(1)
-
-    print("Listening...")
-
-    while True:
-        client, addr = server.accept()
+        sock.sendall(b"OK\n")
+    
+    def _handle_client(self, client, addr):
+        """Handle client connection."""
         print("Connected:", addr)
-
         try:
             while True:
-                line = recv_line(client)
+                line = self._recv_line(client)
                 parts = line.split()
 
                 if parts[:2] == ["CMD", "SEND"]:
-                    handle_send(client, parts)
+                    self._handle_send(client, parts)
 
                 elif parts[:2] == ["CMD", "REQ"]:
-                    handle_request(client, parts)
+                    self._handle_request(client, parts)
 
                 elif parts[:2] == ["CMD", "START"]:
-                    handle_start(client, parts)
+                    self._handle_start(client, parts)
 
                 else:
                     client.sendall(b"ERR\n")
@@ -115,6 +128,43 @@ def run_server(mac, channel):
 
         finally:
             client.close()
+    
+    def start(self):
+        """Start the Bluetooth server."""
+        os.makedirs(self.rx_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
+
+        self.server = socket.socket(socket.AF_BLUETOOTH,
+                                   socket.SOCK_STREAM,
+                                   socket.BTPROTO_RFCOMM)
+        self.server.bind((self.mac, self.channel))
+        self.server.listen(1)
+        self.running = True
+
+        print(f"Listening on {self.mac}:{self.channel}...")
+
+        try:
+            while self.running:
+                client, addr = self.server.accept()
+                self._handle_client(client, addr)
+        except KeyboardInterrupt:
+            print("Server shutting down...")
+        finally:
+            self.stop()
+    
+    def stop(self):
+        """Stop the Bluetooth server."""
+        self.running = False
+        if self.server:
+            try:
+                self.server.close()
+            except:
+                pass
+
+def main():
+    """Run Bluetooth server."""
+    server = BluetoothServer("B8:27:EB:7E:6F:9D", channel=4)
+    server.start()
 
 if __name__ == "__main__":
-    run_server("B8:27:EB:7E:6F:9D", 4)
+    main()
