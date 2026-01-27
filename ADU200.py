@@ -119,6 +119,8 @@ class ADU200:
             print(f'    Product ID: {d["product_id"]}')
         print()
 
+    def __del__(self) -> None:
+        self.disconnect()
 
 if __name__ == "__main__":
     import time
