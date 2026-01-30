@@ -123,7 +123,7 @@ class TrainingBluetoothServer(BluetoothServerBase):
     def start(self) -> None:
         """Start the training Bluetooth server with output directory setup."""
         os.makedirs(self.rx_dir, exist_ok=True)
-        os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.OUTPUT_DIR, exist_ok=True)
         super().start()
     
     def is_running(self) -> bool:
