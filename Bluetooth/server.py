@@ -6,6 +6,7 @@ from base_server import BluetoothServerBase
 
 class TrainingBluetoothServer(BluetoothServerBase):
     """Manages training session execution via Bluetooth RFCOMM server."""
+    OUTPUT_DIR: str = "OutputData/"
     
     def __init__(self, mac: str, channel: int = 4, rx_dir: str = "/tmp/bluetooth_rx", output_dir: str = "/data/outputs") -> None:
         """Initialize training Bluetooth server.
@@ -18,7 +19,6 @@ class TrainingBluetoothServer(BluetoothServerBase):
         """
         super().__init__(mac, channel)
         self.rx_dir: str = rx_dir
-        self.output_dir: str = output_dir
         self.active_process: Optional[subprocess.Popen] = None
     
     def _handle_send(self, parts: List[str]) -> None:
@@ -39,10 +39,12 @@ class TrainingBluetoothServer(BluetoothServerBase):
     def _handle_request(self, parts: List[str]) -> None:
         """Handle CMD REQ - send output file to client."""
         _, _, filename = parts
-        path: str = os.path.join(self.output_dir, os.path.basename(filename))
+        path: str = os.path.join(self.OUTPUT_DIR, os.path.basename(filename))
 
         if not os.path.isfile(path):
-            self.send_bytes(b"ERR\n")
+            avalible_files: str = "\n".join(os.listdir(self.OUTPUT_DIR))
+            #send all files names in output dir to client for user convenience
+            self.send_message(f"ERR-Invalid file request. Available files:\n{avalible_files}")
             return
 
         size: int = os.path.getsize(path)

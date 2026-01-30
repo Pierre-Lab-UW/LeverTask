@@ -121,7 +121,7 @@ def main() -> None:
                 if cmd[0] == "send" and len(cmd) == 3:
                     resp = client.send_file(cmd[1], cmd[2])
                     print("Server:", resp)
-
+                    
                 elif cmd[0] == "request" and len(cmd) == 3:
                     client.request_file(cmd[1], cmd[2])
                     print("File received:", cmd[2])
