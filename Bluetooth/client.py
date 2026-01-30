@@ -1,67 +1,20 @@
-import socket
 import os
+from base_client import BluetoothClientBase
 
 BUFFER_SIZE = 1024
 
-class BluetoothClient:
-    """Manages Bluetooth RFCOMM connection and communication."""
+class TrainingBluetoothClient(BluetoothClientBase):
+    """Manages training configuration transfer and execution via Bluetooth."""
     
     def __init__(self, mac, channel=1, timeout=10):
-        """Initialize Bluetooth client.
+        """Initialize training Bluetooth client.
         
         Args:
             mac: MAC address of device
             channel: RFCOMM channel (default: 1)
             timeout: Socket timeout in seconds (default: 10)
         """
-        self.mac = mac
-        self.channel = channel
-        self.timeout = timeout
-        self.sock = None
-        self.connected = False
-    
-    def connect(self):
-        """Connect to Bluetooth device."""
-        try:
-            self.sock = socket.socket(socket.AF_BLUETOOTH,
-                                     socket.SOCK_STREAM,
-                                     socket.BTPROTO_RFCOMM)
-            self.sock.settimeout(self.timeout)
-            self.sock.connect((self.mac, self.channel))
-            self.connected = True
-            return True
-        except Exception as e:
-            self.connected = False
-            raise ConnectionError(f"Failed to connect to {self.mac}: {str(e)}")
-    
-    def disconnect(self):
-        """Disconnect from device."""
-        if self.sock:
-            try:
-                self.sock.close()
-            except:
-                pass
-            self.connected = False
-    
-    def recv_exact(self, size):
-        """Receive exact number of bytes."""
-        data = b""
-        while len(data) < size:
-            chunk = self.sock.recv(size - len(data))
-            if not chunk:
-                raise ConnectionError("Connection lost")
-            data += chunk
-        return data
-    
-    def recv_line(self):
-        """Receive line (until newline)."""
-        buf = b""
-        while b"\n" not in buf:
-            chunk = self.sock.recv(256)
-            if not chunk:
-                raise ConnectionError("Connection closed")
-            buf += chunk
-        return buf.partition(b"\n")[0].decode().strip()
+        super().__init__(mac, channel, timeout)
     
     def send_file(self, training_id, path):
         """Send file to device.
@@ -79,8 +32,8 @@ class BluetoothClient:
         filename = os.path.basename(path)
         filesize = os.path.getsize(path)
 
-        self.sock.sendall(f"CMD SEND {training_id} {filename} {filesize}\n".encode())
-        resp = self.recv_line()
+        self._send_command(f"CMD SEND {training_id} {filename} {filesize}")
+        resp = self._recv_line()
         if resp != "READY":
             raise RuntimeError(f"Server not ready: {resp}")
 
@@ -88,7 +41,7 @@ class BluetoothClient:
             while chunk := f.read(BUFFER_SIZE):
                 self.sock.sendall(chunk)
 
-        return self.recv_line()
+        return self._recv_line()
     
     def request_file(self, filename, save_path):
         """Request file from device.
@@ -100,9 +53,9 @@ class BluetoothClient:
         if not self.connected:
             raise RuntimeError("Not connected to device")
         
-        self.sock.sendall(f"CMD REQ {filename}\n".encode())
+        self._send_command(f"CMD REQ {filename}")
 
-        header = self.recv_line()
+        header = self._recv_line()
         parts = header.split()
         if parts[:3] != ["CMD", "SEND", "OUT"]:
             raise RuntimeError(f"Invalid server response: {header}")
@@ -110,7 +63,7 @@ class BluetoothClient:
         filesize = int(parts[4])
         self.sock.sendall(b"READY\n")
 
-        data = self.recv_exact(filesize)
+        data = self._recv_exact(filesize)
         with open(save_path, "wb") as f:
             f.write(data)
     
@@ -126,19 +79,42 @@ class BluetoothClient:
         if not self.connected:
             raise RuntimeError("Not connected to device")
         
-        self.sock.sendall(f"CMD START {training_id}\n".encode())
-        return self.recv_line()
+        self._send_command(f"CMD START {training_id}")
+        return self._recv_line()
+
+def print_help():
+    """Print available commands."""
+    print("\n=== Available Commands ===")
+    print("  send <training_id> <file_path>")
+    print("      Send a file to the device")
+    print("      Example: send training1 /path/to/config.yaml")
+    print()
+    print("  request <filename> <save_path>")
+    print("      Request a file from the device")
+    print("      Example: request output.csv /local/path/output.csv")
+    print()
+    print("  start <training_id>")
+    print("      Start training on the device")
+    print("      Example: start training1")
+    print()
+    print("  help")
+    print("      Show this help message")
+    print()
+    print("  quit")
+    print("      Disconnect and exit")
+    print("=======================\n")
 
 def main():
-    """Interactive CLI for Bluetooth client."""
+    """Interactive CLI for training Bluetooth client."""
     mac = input("MAC: ").strip()
     channel = int(input("Channel: "))
 
-    client = BluetoothClient(mac, channel)
+    client = TrainingBluetoothClient(mac, channel)
     
     try:
         client.connect()
         print(f"Connected to {mac}")
+        print_help()
         
         while True:
             cmd = input("> ").strip().split()
@@ -158,11 +134,14 @@ def main():
                     resp = client.start_training(cmd[1])
                     print("Server:", resp)
 
+                elif cmd[0] == "help":
+                    print_help()
+
                 elif cmd[0] == "quit":
                     break
                 
                 else:
-                    print("Unknown command")
+                    print("Unknown command. Type 'help' for available commands.")
             
             except Exception as e:
                 print(f"Error: {str(e)}")

@@ -1,15 +1,13 @@
-import socket
 import os
 import shutil
 import subprocess
+from base_server import BluetoothServerBase
 
-BUFFER_SIZE = 1024
-
-class BluetoothServer:
-    """Manages Bluetooth RFCOMM server for receiving and executing training configs."""
+class TrainingBluetoothServer(BluetoothServerBase):
+    """Manages training session execution via Bluetooth RFCOMM server."""
     
     def __init__(self, mac, channel=4, rx_dir="/tmp/bluetooth_rx", output_dir="/data/outputs"):
-        """Initialize Bluetooth server.
+        """Initialize training Bluetooth server.
         
         Args:
             mac: MAC address to bind to
@@ -17,32 +15,18 @@ class BluetoothServer:
             rx_dir: Directory for received files (default: /tmp/bluetooth_rx)
             output_dir: Directory for output files (default: /data/outputs)
         """
-        self.mac = mac
-        self.channel = channel
+        super().__init__(mac, channel)
         self.rx_dir = rx_dir
         self.output_dir = output_dir
-        self.server = None
-        self.running = False
+        self.active_process: subprocess.Popen = None
     
     def _recv_exact(self, sock, size):
         """Receive exact number of bytes."""
-        data = b""
-        while len(data) < size:
-            chunk = sock.recv(size - len(data))
-            if not chunk:
-                raise ConnectionError("Client disconnected")
-            data += chunk
-        return data
+        return super()._recv_exact(sock, size)
     
     def _recv_line(self, sock):
         """Receive line (until newline)."""
-        buf = b""
-        while b"\n" not in buf:
-            chunk = sock.recv(256)
-            if not chunk:
-                raise ConnectionError("Client disconnected")
-            buf += chunk
-        return buf.partition(b"\n")[0].decode().strip()
+        return super()._recv_line(sock)
     
     def _handle_send(self, sock, parts):
         """Handle CMD SEND - receive file from client."""
@@ -95,7 +79,7 @@ class BluetoothServer:
             return
 
         # Start training process
-        subprocess.Popen([
+        self.active_process = subprocess.Popen([
             "python3", "main.py",
             os.path.join(path, "GlobalParameters.yaml"),
             os.path.join(path, "RatioTraining.yaml")
@@ -130,40 +114,18 @@ class BluetoothServer:
             client.close()
     
     def start(self):
-        """Start the Bluetooth server."""
+        """Start the training Bluetooth server with output directory setup."""
         os.makedirs(self.rx_dir, exist_ok=True)
         os.makedirs(self.output_dir, exist_ok=True)
-
-        self.server = socket.socket(socket.AF_BLUETOOTH,
-                                   socket.SOCK_STREAM,
-                                   socket.BTPROTO_RFCOMM)
-        self.server.bind((self.mac, self.channel))
-        self.server.listen(1)
-        self.running = True
-
-        print(f"Listening on {self.mac}:{self.channel}...")
-
-        try:
-            while self.running:
-                client, addr = self.server.accept()
-                self._handle_client(client, addr)
-        except KeyboardInterrupt:
-            print("Server shutting down...")
-        finally:
-            self.stop()
+        super().start()
     
-    def stop(self):
-        """Stop the Bluetooth server."""
-        self.running = False
-        if self.server:
-            try:
-                self.server.close()
-            except:
-                pass
+    def is_running(self):
+        """Check if training process is running."""
+        return self.active_process is not None and self.active_process.poll() is None
 
 def main():
-    """Run Bluetooth server."""
-    server = BluetoothServer("B8:27:EB:7E:6F:9D", channel=4)
+    """Run training Bluetooth server."""
+    server = TrainingBluetoothServer("B8:27:EB:7E:6F:9D", channel=4)
     server.start()
 
 if __name__ == "__main__":
