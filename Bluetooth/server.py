@@ -79,6 +79,16 @@ class TrainingBluetoothServer(BluetoothServerBase):
 
         self.send_bytes(b"OK\n")
     
+    def _handle_stop(self) -> None:
+        """Handle CMD STOP - stop training on device."""
+        if self.is_running():
+            self.active_process.terminate()
+            self.active_process.wait()
+            self.active_process = None
+            self.send_message("STOPPED TRAINING!")
+        else:
+            self.send_message("ERR: No training running")
+    
     def _handle_client(self, client: socket.socket, addr: Tuple[str, int]) -> None:
         """Handle client connection."""
         self.sock = client
@@ -95,13 +105,7 @@ class TrainingBluetoothServer(BluetoothServerBase):
                     self._handle_request(parts)
                 
                 elif parts[:2] == ["CMD", "STOP"]:
-                    if self.is_running():
-                        self.active_process.terminate()
-                        self.active_process.wait()
-                        self.active_process = None
-                        self.send_bytes(b"STOPPED TRAINING!\n")
-                    else:
-                        self.send_message("ERR: No training running")
+                    self._handle_stop()
 
                 elif parts[:2] == ["CMD", "START"]:
                     self._handle_start(parts)
