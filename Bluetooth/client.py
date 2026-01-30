@@ -33,16 +33,13 @@ class TrainingBluetoothClient(BluetoothClientBase):
         filename: str = os.path.basename(path)
         filesize: int = os.path.getsize(path)
 
-        self._send_command(f"CMD SEND {training_id} {filename} {filesize}")
-        resp: str = self._recv_line()
+        self.send_command(f"CMD SEND {training_id} {filename} {filesize}")
+        resp: str = self.recv_line()
         if resp != "READY":
             raise RuntimeError(f"Server not ready: {resp}")
 
-        with open(path, "rb") as f:
-            while chunk := f.read(BUFFER_SIZE):
-                self.sock.sendall(chunk)
-
-        return self._recv_line()
+        self.send_file_content(path)
+        return self.recv_line()
     
     def request_file(self, filename: str, save_path: str) -> None:
         """Request file from device.
@@ -54,19 +51,17 @@ class TrainingBluetoothClient(BluetoothClientBase):
         if not self.connected:
             raise RuntimeError("Not connected to device")
         
-        self._send_command(f"CMD REQ {filename}")
+        self.send_command(f"CMD REQ {filename}")
 
-        header: str = self._recv_line()
+        header: str = self.recv_line()
         parts: List[str] = header.split()
         if parts[:3] != ["CMD", "SEND", "OUT"]:
             raise RuntimeError(f"Invalid server response: {header}")
 
         filesize: int = int(parts[4])
-        self.sock.sendall(b"READY\n")
+        self.send_bytes(b"READY\n")
 
-        data: bytes = self._recv_exact(filesize)
-        with open(save_path, "wb") as f:
-            f.write(data)
+        self.save_received_data(save_path, filesize)
     
     def start_training(self, training_id: str) -> str:
         """Start training on device.
@@ -80,8 +75,8 @@ class TrainingBluetoothClient(BluetoothClientBase):
         if not self.connected:
             raise RuntimeError("Not connected to device")
         
-        self._send_command(f"CMD START {training_id}")
-        return self._recv_line()
+        self.send_command(f"CMD START {training_id}")
+        return self.recv_line()
 
 def print_help() -> None:
     """Print available commands."""
@@ -134,6 +129,10 @@ def main() -> None:
                 elif cmd[0] == "start" and len(cmd) == 2:
                     resp = client.start_training(cmd[1])
                     print("Server:", resp)
+                
+                elif cmd[0] == "stop":
+                    client.send_command("CMD STOP")
+                    print("Server:", client.recv_line())
 
                 elif cmd[0] == "help":
                     print_help()

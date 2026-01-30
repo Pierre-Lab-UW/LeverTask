@@ -1,5 +1,4 @@
 import os
-import shutil
 import socket
 import subprocess
 from typing import Optional, Tuple, List
@@ -22,15 +21,7 @@ class TrainingBluetoothServer(BluetoothServerBase):
         self.output_dir: str = output_dir
         self.active_process: Optional[subprocess.Popen] = None
     
-    def _recv_exact(self, sock: socket.socket, size: int) -> bytes:
-        """Receive exact number of bytes."""
-        return super()._recv_exact(sock, size)
-    
-    def _recv_line(self, sock: socket.socket) -> str:
-        """Receive line (until newline)."""
-        return super()._recv_line(sock)
-    
-    def _handle_send(self, sock: socket.socket, parts: List[str]) -> None:
+    def _handle_send(self, parts: List[str]) -> None:
         """Handle CMD SEND - receive file from client."""
         _, _, training_id, filename, filesize = parts
         filesize_int: int = int(filesize)
@@ -39,37 +30,36 @@ class TrainingBluetoothServer(BluetoothServerBase):
         os.makedirs(train_dir, exist_ok=True)
         filepath: str = os.path.join(train_dir, os.path.basename(filename))
 
-        sock.sendall(b"READY\n")
-        data: bytes = self._recv_exact(sock, filesize_int)
+        self.send_bytes(b"READY\n")
+        self.save_received_file(filepath, filesize_int)
 
-        with open(filepath, "wb") as f:
-            f.write(data)
-
-        sock.sendall(b"OK\n")
+        self.send_bytes(b"OK\n")
         print("Received:", filepath)
     
-    def _handle_request(self, sock: socket.socket, parts: List[str]) -> None:
+    def _handle_request(self, parts: List[str]) -> None:
         """Handle CMD REQ - send output file to client."""
         _, _, filename = parts
         path: str = os.path.join(self.output_dir, os.path.basename(filename))
 
         if not os.path.isfile(path):
-            sock.sendall(b"ERR\n")
+            self.send_bytes(b"ERR\n")
             return
 
         size: int = os.path.getsize(path)
-        sock.sendall(f"CMD SEND OUT {filename} {size}\n".encode())
+        self.send_message(f"CMD SEND OUT {filename} {size}")
 
-        if self._recv_line(sock) != "READY":
+        if self.recv_line() != "READY":
             return
 
-        with open(path, "rb") as f:
-            shutil.copyfileobj(f, sock)
-
+        self.send_file_content(path)
         print("Sent:", filename)
     
-    def _handle_start(self, sock: socket.socket, parts: List[str]) -> None:
+    def _handle_start(self, parts: List[str]) -> None:
         """Handle CMD START - start training on device."""
+        if self.is_running():
+            self.send_message("ERR: Training already running")
+            return
+
         training_id: str = parts[2]
         path: str = os.path.join(self.rx_dir, training_id)
 
@@ -77,7 +67,7 @@ class TrainingBluetoothServer(BluetoothServerBase):
         if (not os.path.isdir(path) or 
             not os.path.isfile(os.path.join(path, "GlobalParameters.yaml")) or 
             not os.path.isfile(os.path.join(path, "RatioTraining.yaml"))):
-            sock.sendall(b"ERR\n")
+            self.send_message("ERR: Missing required files!")
             return
 
         # Start training process
@@ -87,27 +77,36 @@ class TrainingBluetoothServer(BluetoothServerBase):
             os.path.join(path, "RatioTraining.yaml")
         ])
 
-        sock.sendall(b"OK\n")
+        self.send_bytes(b"OK\n")
     
     def _handle_client(self, client: socket.socket, addr: Tuple[str, int]) -> None:
         """Handle client connection."""
+        self.sock = client
         print("Connected:", addr)
         try:
             while True:
-                line: str = self._recv_line(client)
+                line: str = self.recv_line()
                 parts: List[str] = line.split()
 
                 if parts[:2] == ["CMD", "SEND"]:
-                    self._handle_send(client, parts)
+                    self._handle_send(parts)
 
                 elif parts[:2] == ["CMD", "REQ"]:
-                    self._handle_request(client, parts)
+                    self._handle_request(parts)
+                
+                elif parts[:2] == ["CMD", "STOP"]:
+                    if self.is_running():
+                        self.active_process.terminate()
+                        self.active_process.wait()
+                        self.active_process = None
+                        self.send_bytes(b"STOPPED TRAINING!\n")
+                    else:
+                        self.send_message("ERR: No training running")
 
                 elif parts[:2] == ["CMD", "START"]:
-                    self._handle_start(client, parts)
-
+                    self._handle_start(parts)
                 else:
-                    client.sendall(b"ERR\n")
+                    self.send_bytes(b"ERR - Invalid command\n")
 
         except (ConnectionError, OSError) as e:
             print("Disconnected:", e)

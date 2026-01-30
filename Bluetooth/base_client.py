@@ -9,7 +9,7 @@ class BluetoothClientBase(ABC):
     
     def __init__(self, mac: str, channel: int = 1, timeout: int = 10) -> None:
         """Initialize Bluetooth client.
-        
+         
         Args:
             mac: MAC address of device
             channel: RFCOMM channel (default: 1)
@@ -44,7 +44,7 @@ class BluetoothClientBase(ABC):
                 pass
             self.connected = False
     
-    def _recv_exact(self, size: int) -> bytes:
+    def recv_exact(self, size: int) -> bytes:
         """Receive exact number of bytes."""
         data: bytes = b""
         while len(data) < size:
@@ -54,7 +54,7 @@ class BluetoothClientBase(ABC):
             data += chunk
         return data
     
-    def _recv_line(self) -> str:
+    def recv_line(self) -> str:
         """Receive line (until newline)."""
         buf: bytes = b""
         while b"\n" not in buf:
@@ -64,7 +64,7 @@ class BluetoothClientBase(ABC):
             buf += chunk
         return buf.partition(b"\n")[0].decode().strip()
     
-    def _send_command(self, command: str) -> None:
+    def send_command(self, command: str) -> None:
         """Send command to device.
         
         Args:
@@ -73,3 +73,36 @@ class BluetoothClientBase(ABC):
         if not self.connected:
             raise RuntimeError("Not connected to device")
         self.sock.sendall(command.encode() + b"\n")
+    
+    def send_bytes(self, data: bytes) -> None:
+        """Send raw bytes to device.
+        
+        Args:
+            data: Bytes to send
+        """
+        if not self.connected:
+            raise RuntimeError("Not connected to device")
+        self.sock.sendall(data)
+    
+    def send_file_content(self, file_path: str) -> None:
+        """Send file content in chunks.
+        
+        Args:
+            file_path: Path to file to send
+        """
+        if not self.connected:
+            raise RuntimeError("Not connected to device")
+        with open(file_path, "rb") as f:
+            while chunk := f.read(BUFFER_SIZE):
+                self.sock.sendall(chunk)
+    
+    def save_received_data(self, file_path: str, size: int) -> None:
+        """Save received data to file.
+        
+        Args:
+            file_path: Path where to save file
+            size: Number of bytes to receive
+        """
+        data: bytes = self.recv_exact(size)
+        with open(file_path, "wb") as f:
+            f.write(data)
