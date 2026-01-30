@@ -1,12 +1,13 @@
 import socket
 from abc import ABC, abstractmethod
+from typing import Optional
 
-BUFFER_SIZE = 1024
+BUFFER_SIZE: int = 1024
 
 class BluetoothClientBase(ABC):
     """Base class for Bluetooth RFCOMM clients. Handles socket communication logic."""
     
-    def __init__(self, mac, channel=1, timeout=10):
+    def __init__(self, mac: str, channel: int = 1, timeout: int = 10) -> None:
         """Initialize Bluetooth client.
         
         Args:
@@ -14,13 +15,13 @@ class BluetoothClientBase(ABC):
             channel: RFCOMM channel (default: 1)
             timeout: Socket timeout in seconds (default: 10)
         """
-        self.mac = mac
-        self.channel = channel
-        self.timeout = timeout
-        self.sock = None
-        self.connected = False
+        self.mac: str = mac
+        self.channel: int = channel
+        self.timeout: int = timeout
+        self.sock: Optional[socket.socket] = None
+        self.connected: bool = False
     
-    def connect(self):
+    def connect(self) -> bool:
         """Connect to Bluetooth device."""
         try:
             self.sock = socket.socket(socket.AF_BLUETOOTH,
@@ -34,7 +35,7 @@ class BluetoothClientBase(ABC):
             self.connected = False
             raise ConnectionError(f"Failed to connect to {self.mac}: {str(e)}")
     
-    def disconnect(self):
+    def disconnect(self) -> None:
         """Disconnect from device."""
         if self.sock:
             try:
@@ -43,27 +44,27 @@ class BluetoothClientBase(ABC):
                 pass
             self.connected = False
     
-    def _recv_exact(self, size):
+    def _recv_exact(self, size: int) -> bytes:
         """Receive exact number of bytes."""
-        data = b""
+        data: bytes = b""
         while len(data) < size:
-            chunk = self.sock.recv(size - len(data))
+            chunk: bytes = self.sock.recv(size - len(data))
             if not chunk:
                 raise ConnectionError("Connection lost")
             data += chunk
         return data
     
-    def _recv_line(self):
+    def _recv_line(self) -> str:
         """Receive line (until newline)."""
-        buf = b""
+        buf: bytes = b""
         while b"\n" not in buf:
-            chunk = self.sock.recv(256)
+            chunk: bytes = self.sock.recv(256)
             if not chunk:
                 raise ConnectionError("Connection closed")
             buf += chunk
         return buf.partition(b"\n")[0].decode().strip()
     
-    def _send_command(self, command):
+    def _send_command(self, command: str) -> None:
         """Send command to device.
         
         Args:

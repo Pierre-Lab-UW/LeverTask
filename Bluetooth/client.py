@@ -1,12 +1,13 @@
 import os
+from typing import List
 from base_client import BluetoothClientBase
 
-BUFFER_SIZE = 1024
+BUFFER_SIZE: int = 1024
 
 class TrainingBluetoothClient(BluetoothClientBase):
     """Manages training configuration transfer and execution via Bluetooth."""
     
-    def __init__(self, mac, channel=1, timeout=10):
+    def __init__(self, mac: str, channel: int = 1, timeout: int = 10) -> None:
         """Initialize training Bluetooth client.
         
         Args:
@@ -16,7 +17,7 @@ class TrainingBluetoothClient(BluetoothClientBase):
         """
         super().__init__(mac, channel, timeout)
     
-    def send_file(self, training_id, path):
+    def send_file(self, training_id: str, path: str) -> str:
         """Send file to device.
         
         Args:
@@ -29,11 +30,11 @@ class TrainingBluetoothClient(BluetoothClientBase):
         if not self.connected:
             raise RuntimeError("Not connected to device")
         
-        filename = os.path.basename(path)
-        filesize = os.path.getsize(path)
+        filename: str = os.path.basename(path)
+        filesize: int = os.path.getsize(path)
 
         self._send_command(f"CMD SEND {training_id} {filename} {filesize}")
-        resp = self._recv_line()
+        resp: str = self._recv_line()
         if resp != "READY":
             raise RuntimeError(f"Server not ready: {resp}")
 
@@ -43,7 +44,7 @@ class TrainingBluetoothClient(BluetoothClientBase):
 
         return self._recv_line()
     
-    def request_file(self, filename, save_path):
+    def request_file(self, filename: str, save_path: str) -> None:
         """Request file from device.
         
         Args:
@@ -55,19 +56,19 @@ class TrainingBluetoothClient(BluetoothClientBase):
         
         self._send_command(f"CMD REQ {filename}")
 
-        header = self._recv_line()
-        parts = header.split()
+        header: str = self._recv_line()
+        parts: List[str] = header.split()
         if parts[:3] != ["CMD", "SEND", "OUT"]:
             raise RuntimeError(f"Invalid server response: {header}")
 
-        filesize = int(parts[4])
+        filesize: int = int(parts[4])
         self.sock.sendall(b"READY\n")
 
-        data = self._recv_exact(filesize)
+        data: bytes = self._recv_exact(filesize)
         with open(save_path, "wb") as f:
             f.write(data)
     
-    def start_training(self, training_id):
+    def start_training(self, training_id: str) -> str:
         """Start training on device.
         
         Args:
@@ -82,7 +83,7 @@ class TrainingBluetoothClient(BluetoothClientBase):
         self._send_command(f"CMD START {training_id}")
         return self._recv_line()
 
-def print_help():
+def print_help() -> None:
     """Print available commands."""
     print("\n=== Available Commands ===")
     print("  send <training_id> <file_path>")
@@ -104,12 +105,12 @@ def print_help():
     print("      Disconnect and exit")
     print("=======================\n")
 
-def main():
+def main() -> None:
     """Interactive CLI for training Bluetooth client."""
-    mac = input("MAC: ").strip()
-    channel = int(input("Channel: "))
+    mac: str = input("MAC: ").strip()
+    channel: int = int(input("Channel: "))
 
-    client = TrainingBluetoothClient(mac, channel)
+    client: TrainingBluetoothClient = TrainingBluetoothClient(mac, channel)
     
     try:
         client.connect()
@@ -117,7 +118,7 @@ def main():
         print_help()
         
         while True:
-            cmd = input("> ").strip().split()
+            cmd: List[str] = input("> ").strip().split()
             if not cmd:
                 continue
 
