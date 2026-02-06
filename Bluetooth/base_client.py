@@ -1,6 +1,7 @@
 import socket
 from abc import ABC, abstractmethod
 from typing import Optional
+import select
 
 BUFFER_SIZE: int = 1024
 
@@ -106,3 +107,42 @@ class BluetoothClientBase(ABC):
         data: bytes = self.recv_exact(size)
         with open(file_path, "wb") as f:
             f.write(data)
+    
+    def is_alive(self, timeout: float = 1.0) -> bool:
+        """Check if connection is still alive.
+        
+        Args:
+            timeout: Timeout in seconds for checking
+            
+        Returns:
+            True if connection is active, False otherwise
+        """
+        if not self.connected or self.sock is None:
+            return False
+        
+        try:
+            # Use select to check if socket is readable without blocking
+            # A closed socket will be readable and recv will return empty bytes
+            ready, _, exceptional = select.select([self.sock], [], [self.sock], timeout)
+            
+            if exceptional:
+                # Socket has an exception
+                self.connected = False
+                return False
+            
+            if ready:
+                # Socket is readable - try to peek at it without consuming data
+                try:
+                    data = self.sock.recv(1, socket.MSG_PEEK)
+                    if not data:
+                        # Empty recv with MSG_PEEK means connection is closed
+                        self.connected = False
+                        return False
+                except:
+                    self.connected = False
+                    return False
+            
+            return True
+        except:
+            self.connected = False
+            return False

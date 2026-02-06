@@ -90,6 +90,23 @@ class TrainingBluetoothClient(BluetoothClientBase):
         
         self.send_command("CMD STOP")
         return self.recv_line()
+    
+    def ping(self) -> bool:
+        """Send heartbeat ping to server.
+        
+        Returns:
+            True if server responds with PONG, False otherwise
+        """
+        if not self.connected:
+            return False
+        
+        try:
+            self.send_command("CMD PING")
+            resp: str = self.recv_line()
+            return resp == "PONG"
+        except:
+            self.connected = False
+            return False
 
 def print_help() -> None:
     """Print available commands."""

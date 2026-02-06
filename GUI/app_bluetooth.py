@@ -157,23 +157,26 @@ class TrainingBluetoothGUI(TrainingGUI):
         def _loop():
             while not self.bt_monitor_stop.is_set():
                 try:
-                    alive = True
-                    try:
-                        alive = self.bt_client.is_alive(timeout=1.0)
-                    except Exception:
-                        alive = False
+                    if self.bt_client is None:
+                        break
+                    
+                    # Send heartbeat ping to check if server is alive
+                    alive = self.bt_client.ping()
+                    
                     if not alive:
                         # notify and trigger disconnect on main thread
                         try:
-                            self.after(0, lambda: messagebox.showwarning('Bluetooth', 'Connection lost'))
-                            self.after(0, self._disconnect_bt)
+                            # Update status message first
+                            self.after(0, lambda: self.status_var.set('Connection lost - disconnected'))
+                            self.after(100, lambda: messagebox.showwarning('Bluetooth', 'Server stopped or connection lost. Please reconnect.'))
+                            self.after(200, self._disconnect_bt)
                         except Exception:
                             pass
                         break
                 except Exception:
                     pass
                 # wait with event so we can stop promptly
-                self.bt_monitor_stop.wait(2.0)
+                self.bt_monitor_stop.wait(3.0)
 
         self.bt_monitor_thread = threading.Thread(target=_loop, daemon=True)
         self.bt_monitor_thread.start()
@@ -189,27 +192,6 @@ class TrainingBluetoothGUI(TrainingGUI):
             self.bt_monitor_thread = None
         except Exception:
             pass
-
-    def _start_remote_training(self):
-        if not self.bt_client:
-            messagebox.showwarning('Bluetooth', 'Not connected')
-            return
-        default_id = Path(str(self.current_file_path)).stem if getattr(self, 'current_file_path', None) else ''
-        training_id = simpledialog.askstring('Training ID', 'Training ID to start on device:', initialvalue=default_id)
-        if not training_id:
-            return
-
-        def do_start():
-            try:
-                self.status_var.set('Starting remote training...')
-                resp = self.bt_client.start_training(training_id)
-                self.status_var.set('Remote start response')
-                messagebox.showinfo('Start', f'Server: {resp}')
-            except Exception as e:
-                self.status_var.set('Remote start failed')
-                messagebox.showerror('Start', str(e))
-
-        threading.Thread(target=do_start, daemon=True).start()
 
     def _start_remote_training(self):
         if not self.bt_client:

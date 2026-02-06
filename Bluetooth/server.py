@@ -87,6 +87,7 @@ class TrainingBluetoothServer(BluetoothServerBase):
             self.active_process.terminate()
             self.active_process.wait()
             self.active_process = None
+            print("Training stopped by client")
             self.send_message("STOPPED TRAINING!")
         else:
             self.send_message("ERR: No training running")
@@ -111,6 +112,10 @@ class TrainingBluetoothServer(BluetoothServerBase):
 
                 elif parts[:2] == ["CMD", "START"]:
                     self._handle_start(parts)
+                
+                elif parts[:2] == ["CMD", "PING"]:
+                    self.send_message("PONG")
+                
                 else:
                     self.send_bytes(b"ERR - Invalid command\n")
 
