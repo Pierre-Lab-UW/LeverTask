@@ -1,6 +1,7 @@
 import os
 from typing import List
-from base_client import BluetoothClientBase
+if not __name__ == "__main__":
+    from Bluetooth.base_client import BluetoothClientBase
 
 BUFFER_SIZE: int = 1024
 
@@ -77,6 +78,18 @@ class TrainingBluetoothClient(BluetoothClientBase):
         
         self.send_command(f"CMD START {training_id}")
         return self.recv_line()
+    
+    def stop_training(self) -> str:
+        """Stop training on device.
+        
+        Returns:
+            Server response message
+        """
+        if not self.connected:
+            raise RuntimeError("Not connected to device")
+        
+        self.send_command("CMD STOP")
+        return self.recv_line()
 
 def print_help() -> None:
     """Print available commands."""
@@ -150,4 +163,5 @@ def main() -> None:
         client.disconnect()
 
 if __name__ == "__main__":
+    from base_client import BluetoothClientBase
     main()
