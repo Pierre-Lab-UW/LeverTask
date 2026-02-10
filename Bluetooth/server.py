@@ -40,7 +40,7 @@ class TrainingBluetoothServer(BluetoothServerBase):
         """Handle CMD REQ - send output file to client."""
         _, _, filename = parts
         path: str = os.path.join(self.output_dir, os.path.basename(filename))
-        
+        self._handle_list_output_files()
         if not os.path.isfile(path):
             avalible_files: str = "\n".join(os.listdir(self.output_dir))
             print("File not found:", filename)
@@ -60,6 +60,14 @@ class TrainingBluetoothServer(BluetoothServerBase):
         self.send_file_content(path)
         print("Sent:", filename)
     
+    def _handle_list_output_files(self):
+        files: str = os.listdir(self.output_dir)
+
+        avalible_files_string: str = [i+")"+files[i] for i in range(len(files))]
+        print(avalible_files_string)
+
+    
+
     def _handle_start(self, parts: List[str]) -> None:
         """Handle CMD START - start training on device."""
         if self.is_running():
