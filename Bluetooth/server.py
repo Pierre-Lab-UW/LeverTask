@@ -40,7 +40,6 @@ class TrainingBluetoothServer(BluetoothServerBase):
         """Handle CMD REQ - send output file to client."""
         _, _, filename = parts
         path: str = os.path.join(self.output_dir, os.path.basename(filename))
-        self._handle_list_output_files()
         if not os.path.isfile(path):
             avalible_files: str = "\n".join(os.listdir(self.output_dir))
             print("File not found:", filename)
