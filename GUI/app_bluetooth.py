@@ -151,35 +151,36 @@ class TrainingBluetoothGUI(TrainingGUI):
 
     # --- Bluetooth monitor helpers ---
     def _start_bt_monitor(self):
+        pass
         # Stop any previous monitor
-        self._stop_bt_monitor()
-        self.bt_monitor_stop = threading.Event()
-        def _loop():
-            while not self.bt_monitor_stop.is_set():
-                try:
-                    if self.bt_client is None:
-                        break
+        # self._stop_bt_monitor()
+        # self.bt_monitor_stop = threading.Event()
+        # def _loop():
+        #     while not self.bt_monitor_stop.is_set():
+        #         try:
+        #             if self.bt_client is None:
+        #                 break
                     
-                    # Send heartbeat ping to check if server is alive
-                    alive = self.bt_client.ping()
+        #             # Send heartbeat ping to check if server is alive
+        #             alive = self.bt_client.ping()
                     
-                    if not alive:
-                        # notify and trigger disconnect on main thread
-                        try:
-                            # Update status message first
-                            self.after(0, lambda: self.status_var.set('Connection lost - disconnected'))
-                            self.after(100, lambda: messagebox.showwarning('Bluetooth', 'Server stopped or connection lost. Please reconnect.'))
-                            self.after(200, self._disconnect_bt)
-                        except Exception:
-                            pass
-                        break
-                except Exception:
-                    pass
-                # wait with event so we can stop promptly
-                self.bt_monitor_stop.wait(3.0)
+        #             if not alive:
+        #                 # notify and trigger disconnect on main thread
+        #                 try:
+        #                     # Update status message first
+        #                     self.after(0, lambda: self.status_var.set('Connection lost - disconnected'))
+        #                     self.after(100, lambda: messagebox.showwarning('Bluetooth', 'Server stopped or connection lost. Please reconnect.'))
+        #                     self.after(200, self._disconnect_bt)
+        #                 except Exception:
+        #                     pass
+        #                 break
+        #         except Exception:
+        #             pass
+        #         # wait with event so we can stop promptly
+        #         self.bt_monitor_stop.wait(3.0)
 
-        self.bt_monitor_thread = threading.Thread(target=_loop, daemon=True)
-        self.bt_monitor_thread.start()
+        # self.bt_monitor_thread = threading.Thread(target=_loop, daemon=True)
+        # self.bt_monitor_thread.start()
 
     def _stop_bt_monitor(self):
         try:

@@ -36,9 +36,31 @@ class TrainingGUI(tk.Tk):
 
         self.load_training_list()
 
-        # Params frame
-        self.params_frame = ttk.Frame(container, padding=10, borderwidth=1, relief='groove')
-        self.params_frame.grid(row=1, column=0, columnspan=2, pady=10)
+        # Params frame with scrolling
+        params_wrapper = ttk.Frame(container)
+        params_wrapper.grid(row=1, column=0, columnspan=2, pady=10, sticky='nsew')
+        
+        # Create canvas and scrollbar
+        self.params_canvas = tk.Canvas(params_wrapper, height=250, bg='white', highlightthickness=0)
+        scrollbar = ttk.Scrollbar(params_wrapper, orient='vertical', command=self.params_canvas.yview)
+        self.params_frame = ttk.Frame(self.params_canvas, padding=10)
+        
+        self.params_canvas.configure(yscrollcommand=scrollbar.set)
+        self.params_canvas.pack(side='left', fill='both', expand=True)
+        scrollbar.pack(side='right', fill='y')
+        
+        # Create window in canvas
+        self.params_window_id = self.params_canvas.create_window((0, 0), window=self.params_frame, anchor='nw')
+        
+        # Bind mousewheel for scrolling
+        def _on_mousewheel(event):
+            self.params_canvas.yview_scroll(int(-1*(event.delta/120)), 'units')
+        self.params_canvas.bind_all('<MouseWheel>', _on_mousewheel)
+        
+        # Update scroll region when frame is configured
+        def _update_scroll_region(event=None):
+            self.params_canvas.configure(scrollregion=self.params_canvas.bbox('all'))
+        self.params_frame.bind('<Configure>', _update_scroll_region)
 
         # Runner selection (store label so we can hide/show)
         self.runner_label = ttk.Label(container, text='Runner:')

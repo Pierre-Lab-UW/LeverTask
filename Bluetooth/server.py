@@ -43,6 +43,8 @@ class TrainingBluetoothServer(BluetoothServerBase):
         
         if not os.path.isfile(path):
             avalible_files: str = "\n".join(os.listdir(self.output_dir))
+            print("File not found:", filename)
+            print("Available files:\n", avalible_files)
             #send all files names in output dir to client for user convenience
             self.send_message(f"ERR-Invalid file request. Available files:\n{avalible_files}")
             return
