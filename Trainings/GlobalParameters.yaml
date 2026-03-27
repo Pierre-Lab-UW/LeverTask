@@ -74,7 +74,7 @@ parameters:
     description: Sex of the subject
     type: str
   Site:
-    actual: WNPRC
+    actual: Texas
     default: WNPRC
     description: Site the experiment is being run on.
     options:
@@ -83,7 +83,7 @@ parameters:
     - California
     type: dropdown
   StudyCode:
-    actual: bass2022
+    actual: bass2024
     default: bass2022
     description: The code for the study being done.
     type: str

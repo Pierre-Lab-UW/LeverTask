@@ -3,7 +3,6 @@ import pygame,sys
 from pygame.locals import *
 from LeverBase import *
 from LeverEventBase import LeverEventBase, DebugEvent
-from Events.RecordDataEvent import *
 from Trainings import *
 import importlib
 import os

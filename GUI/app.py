@@ -6,6 +6,7 @@ import glob
 import os
 import subprocess
 from pathlib import Path
+import random
 
 ROOT = Path(__file__).resolve().parents[1]
 TRAININGS_DIR = ROOT / 'Trainings'
@@ -26,6 +27,7 @@ class TrainingGUI(tk.Tk):
 
         #current file path
         self.current_file_path = ''
+        self.names_to_paths: dict[str, str] = {}
 
         # Training selection
         ttk.Label(container, text='Select Training:').grid(row=0, column=0, sticky='w')
@@ -33,8 +35,6 @@ class TrainingGUI(tk.Tk):
         self.training_combo = ttk.Combobox(container, textvariable=self.training_var, state='readonly', width=40)
         self.training_combo.grid(row=0, column=1, sticky='w', padx=8, pady=6)
         self.training_combo.bind('<<ComboboxSelected>>', self.on_select_training)
-
-        self.load_training_list()
 
         # Params frame with scrolling
         params_wrapper = ttk.Frame(container)
@@ -79,6 +79,11 @@ class TrainingGUI(tk.Tk):
         self.start_btn = ttk.Button(btn_frame, text='Start Training', command=self.start_training)
         self.start_btn.grid(row=0, column=1, padx=6)
 
+        
+        self.load_file_btn = ttk.Button(btn_frame, text='Load File', command=self.browse_param_file)
+        self.load_file_btn.grid(row=0, column=2, padx=6)
+
+
         # status
         self.status_var = tk.StringVar(value='Ready')
         ttk.Label(container, textvariable=self.status_var).grid(row=7, column=0, columnspan=2)
@@ -87,12 +92,6 @@ class TrainingGUI(tk.Tk):
         if self.training_combo['values']:
             self.training_combo.current(0)
             self.on_select_training()
-
-    def load_training_list(self):
-        files = sorted(glob.glob(str(TRAININGS_DIR / '*.yaml')))
-        self.yaml_files = files
-        names = [os.path.basename(f) for f in files]
-        self.training_combo['values'] = names
 
     # --- Tooltip helper ---
     class Tooltip:
@@ -153,7 +152,7 @@ class TrainingGUI(tk.Tk):
         sel = self.training_combo.get()
         if not sel:
             return
-        path = TRAININGS_DIR / sel
+        path = self.names_to_paths[sel]
         with open(path, 'r') as f:
             data = yaml.safe_load(f)
         self.current_file_path = path
@@ -227,6 +226,10 @@ class TrainingGUI(tk.Tk):
                     )
                     if file_path:
                         v.set(file_path)
+                        # list_values = list(self.training_combo['values'])
+                        # list_values.append(file_path)
+                        # self.training_combo['values'] = tuple(list_values)
+
                 ttk.Button(frame, text='Browse', command=_browse).pack(side='left', padx=6)
                 self.param_widgets[key] = (ptype, var)
                 # tooltip attached to entry
@@ -277,7 +280,7 @@ class TrainingGUI(tk.Tk):
         sel = self.training_combo.get()
         if not sel:
             return
-        path = TRAININGS_DIR / sel
+        path = self.names_to_paths[sel]
         with open(path, 'r') as f:
             data = yaml.safe_load(f)
         for key, (ptype, var) in self.param_widgets.items():
@@ -314,7 +317,7 @@ class TrainingGUI(tk.Tk):
         sel = self.training_combo.get()
         if not sel:
             return
-        path = TRAININGS_DIR / sel
+        path = self.names_to_paths[sel]
         # read TaskName to get class name
         with open(path, 'r') as f:
             data = yaml.safe_load(f)
@@ -338,6 +341,40 @@ class TrainingGUI(tk.Tk):
         )
         if file_path:
             self.globalparam_var.set(file_path)
+            if file_path not in self.training_combo['values']:
+                self.training_combo['values'].append(file_path)
+
+    
+    def browse_param_file(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Parameter File to Open",
+            filetypes=[("YAML files", "*.yaml *.yml"), ("All files", "*.*")]
+        )
+        if not file_path:
+            return
+        
+        file_name = Path(file_path).stem
+        if file_name in self.names_to_paths:
+            if not self.names_to_paths[file_name] == file_path:
+                while True:
+                    file_name = file_name + str(random.randint(1,10))
+                    if file_name not in self.names_to_paths:
+                        break
+            else:
+                self.training_combo.set(file_name)
+                self.training_combo.event_generate('<<ComboboxSelected>>')
+                return
+        
+        self.names_to_paths[file_name] = file_path
+        list_values = list(self.training_combo['values'])
+        list_values.append(file_name)
+        self.training_combo['values'] = tuple(list_values)
+        self.training_combo.set(file_name)
+        self.training_combo.event_generate('<<ComboboxSelected>>')
+
+                
+                
+            
 
 if __name__ == '__main__':
     app = TrainingGUI()

@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from pathlib import Path
 import yaml
+
 try:
     from Bluetooth.client import *
 except Exception:

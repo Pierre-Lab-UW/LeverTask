@@ -4,7 +4,7 @@ parameters:
     default: true
     type: bool
   Lev1_ITI:
-    actual: 5
+    actual: 3
     default: 3
     type: int
   Lev1_Iteration:
@@ -27,7 +27,7 @@ parameters:
     description: Logical name/type for the output (for documentation)
     type: str
   Lev1_Schedule:
-    actual: Fixed
+    actual: Progressive
     default: Fixed
     options:
     - Fixed
