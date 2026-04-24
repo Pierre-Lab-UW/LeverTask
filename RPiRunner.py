@@ -1,6 +1,6 @@
 
 from SwitchLever import SwitchLever
-import TrainingRunnerBase
+from TrainingRunnerBase import TrainingRunnerBase
 import sys
 
 class RPIRunner(TrainingRunnerBase):
