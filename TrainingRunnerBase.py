@@ -56,7 +56,6 @@ class TrainingRunnerBase:
 
     def run(self):
         ADU200.get_instance()
-        raise NotImplementedError("Subclasses of TrainingRunnerBase must implement the run() method.")
 
     def on_finish(self):
         print("Training finished. Performing cleanup...")
