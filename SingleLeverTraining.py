@@ -35,7 +35,7 @@ class SingleLeverTraining():
            Returns:
                 Whether or not the program should end.
         '''
-        should_end: bool =  (time.time() - self.start_time) > self.get_global_param("SessionLength", 60)*60
+        should_end: bool =  (time.time() - self.start_time) > self.get_global_param("SessionDuration", 60)*60
         if should_end:
             print(f"{self.lever1.name} training ended.")
         return should_end

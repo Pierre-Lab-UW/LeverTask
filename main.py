@@ -71,7 +71,7 @@ except (ModuleNotFoundError, AttributeError):
     print(f"Could not find training class '{training_class_name}' in Trainings/{training_class_name}.py")
     sys.exit(1)
 
-training_instance = TrainingClass(lever_1, lever_2, param_file, global_param_file)
+training_instance = TrainingClass.from_filepath(lever_1, lever_2, param_file, global_param_file)
 training_instance.start_event()
 
 ADU200.get_instance()

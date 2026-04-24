@@ -95,7 +95,7 @@ except Exception as e:
     sys.exit(1)
 
 
-training_instance = TrainingClass(lever_pygame_1, lever_pygame_2, param_file, global_param_file)
+training_instance = TrainingClass.from_filepath(lever_pygame_1, lever_pygame_2, param_file, global_param_file)
 training_instance.start_event()
 
 pygame_events = pygame.event.get()
