@@ -113,6 +113,11 @@ class TrainingBluetoothServer(BluetoothServerBase):
         else:
             self.send_message("ERR: No training running")
     
+    def _handle_status(self) -> None:
+        """Handle CMD STATUS - return current server status."""
+        status: str = 'running training' if self.is_running() else 'idle'
+        self.send_message(status)
+
     def _handle_client(self, client: socket.socket, addr: Tuple[str, int]) -> None:
         """Handle client connection."""
         self.sock = client
@@ -133,6 +138,9 @@ class TrainingBluetoothServer(BluetoothServerBase):
 
                 elif parts[:2] == ["CMD", "START"]:
                     self._handle_start(parts)
+
+                elif parts[:2] == ["CMD", "STATUS"]:
+                    self._handle_status()
                 
                 elif parts[:2] == ["CMD", "PING"]:
                     self.send_message("PONG")
@@ -145,6 +153,7 @@ class TrainingBluetoothServer(BluetoothServerBase):
 
         finally:
             client.close()
+            self.sock = None
     
     def start(self) -> None:
         """Start the training Bluetooth server with output directory setup."""

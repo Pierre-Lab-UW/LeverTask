@@ -2,6 +2,7 @@ import socket
 from abc import ABC, abstractmethod
 from typing import Optional
 import select
+import threading
 
 BUFFER_SIZE: int = 1024
 
@@ -21,6 +22,7 @@ class BluetoothClientBase(ABC):
         self.timeout: int = timeout
         self.sock: Optional[socket.socket] = None
         self.connected: bool = False
+        self._sock_lock = threading.Lock()
     
     def connect(self) -> bool:
         """Connect to Bluetooth device."""

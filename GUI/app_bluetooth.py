@@ -4,7 +4,6 @@ import threading
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from pathlib import Path
-import yaml
 
 try:
     from Bluetooth.client import *
@@ -65,6 +64,10 @@ class TrainingBluetoothGUI(TrainingGUI):
 
         self.request_btn = ttk.Button(self.bt_frame, text='Request File', command=self._request_file, state='disabled')
         self.request_btn.grid(row=1, column=5, columnspan=2, pady=6)
+
+        self.bt_status_var = tk.StringVar(value='Bluetooth: disconnected')
+        ttk.Label(self.bt_frame, textvariable=self.bt_status_var).grid(row=2, column=0, columnspan=6, pady=(6,0), sticky='w')
+
         self.set_run_controls_visible(False)
     # --- Bluetooth helper wrappers (run in threads) ---
     def _connect_bt(self):
@@ -83,18 +86,19 @@ class TrainingBluetoothGUI(TrainingGUI):
                 self.status_var.set(f'Connecting to {mac}:{chan}...')
                 self.bt_client = TrainingBluetoothClient(mac, chan)
                 self.bt_client.connect()
-                self.status_var.set(f'Connected to {mac}')
                 self.connect_btn.config(state='disabled')
                 self.disconnect_btn.config(state='normal')
                 self.send_btn.config(state='normal')
                 self.start_remote_btn.config(state='normal')
                 self.stop_btn.config(state='normal')
                 self.request_btn.config(state='normal')
+                self._set_bt_status('connected')
                 # start background monitor to detect dropped connections
                 self._start_bt_monitor()
                 messagebox.showinfo('Bluetooth', f'Connected to {mac}')
             except Exception as e:
                 self.status_var.set('Bluetooth connect failed')
+                self._set_bt_status('disconnected')
                 messagebox.showerror('Bluetooth Connect', str(e))
 
         threading.Thread(target=do_connect, daemon=True).start()
@@ -109,6 +113,7 @@ class TrainingBluetoothGUI(TrainingGUI):
             # stop monitor if running
             self._stop_bt_monitor()
             self.status_var.set('Bluetooth disconnected')
+            self._set_bt_status('disconnected')
             self.connect_btn.config(state='normal')
             self.disconnect_btn.config(state='disabled')
             self.send_btn.config(state='disabled')
@@ -147,37 +152,29 @@ class TrainingBluetoothGUI(TrainingGUI):
         threading.Thread(target=do_send, daemon=True).start()
 
     # --- Bluetooth monitor helpers ---
-    def _start_bt_monitor(self):
-        pass
-        # Stop any previous monitor
-        # self._stop_bt_monitor()
-        # self.bt_monitor_stop = threading.Event()
-        # def _loop():
-        #     while not self.bt_monitor_stop.is_set():
-        #         try:
-        #             if self.bt_client is None:
-        #                 break
-                    
-        #             # Send heartbeat ping to check if server is alive
-        #             alive = self.bt_client.ping()
-                    
-        #             if not alive:
-        #                 # notify and trigger disconnect on main thread
-        #                 try:
-        #                     # Update status message first
-        #                     self.after(0, lambda: self.status_var.set('Connection lost - disconnected'))
-        #                     self.after(100, lambda: messagebox.showwarning('Bluetooth', 'Server stopped or connection lost. Please reconnect.'))
-        #                     self.after(200, self._disconnect_bt)
-        #                 except Exception:
-        #                     pass
-        #                 break
-        #         except Exception:
-        #             pass
-        #         # wait with event so we can stop promptly
-        #         self.bt_monitor_stop.wait(3.0)
+    def _set_bt_status(self, status: str) -> None:
+        self.bt_status_var.set(f'Bluetooth: {status}')
 
-        # self.bt_monitor_thread = threading.Thread(target=_loop, daemon=True)
-        # self.bt_monitor_thread.start()
+    def _start_bt_monitor(self):
+        self._stop_bt_monitor()
+        self.bt_monitor_stop = threading.Event()
+
+        def _loop():
+            while not self.bt_monitor_stop.is_set():
+                if self.bt_client is None or not self.bt_client.connected:
+                    self.after(0, lambda: self._set_bt_status('disconnected'))
+                    break
+                try:
+                    status = self.bt_client.get_status()
+                    self.after(0, lambda status=status: self._set_bt_status(status))
+                except Exception:
+                    self.after(0, lambda: self.status_var.set('Bluetooth connection lost'))
+                    self.after(0, self._disconnect_bt)
+                    break
+                self.bt_monitor_stop.wait(2.0)
+
+        self.bt_monitor_thread = threading.Thread(target=_loop, daemon=True)
+        self.bt_monitor_thread.start()
 
     def _stop_bt_monitor(self):
         try:
@@ -205,6 +202,7 @@ class TrainingBluetoothGUI(TrainingGUI):
                 self.status_var.set('Starting remote training...')
                 resp = self.bt_client.start_training(training_id)
                 self.status_var.set('Remote start response')
+                self._set_bt_status('running training')
                 messagebox.showinfo('Start', f'Server: {resp}')
             except Exception as e:
                 self.status_var.set('Remote start failed')
@@ -222,6 +220,7 @@ class TrainingBluetoothGUI(TrainingGUI):
                 self.status_var.set('Stopping training...')
                 resp = self.bt_client.stop_training()
                 self.status_var.set('Training stopped')
+                self._set_bt_status('idle')
                 messagebox.showinfo('Stop', f'Server: {resp}')
             except Exception as e:
                 self.status_var.set('Stop failed')

@@ -34,13 +34,14 @@ class TrainingBluetoothClient(BluetoothClientBase):
         filename: str = os.path.basename(path)
         filesize: int = os.path.getsize(path)
 
-        self.send_command(f"CMD SEND {training_id} {filename} {filesize}")
-        resp: str = self.recv_line()
-        if resp != "READY":
-            raise RuntimeError(f"Server not ready: {resp}")
+        with self._sock_lock:
+            self.send_command(f"CMD SEND {training_id} {filename} {filesize}")
+            resp: str = self.recv_line()
+            if resp != "READY":
+                raise RuntimeError(f"Server not ready: {resp}")
 
-        self.send_file_content(path)
-        return self.recv_line()
+            self.send_file_content(path)
+            return self.recv_line()
     
     def request_file(self, filename: str, save_path: str) -> None:
         """Request file from device.
@@ -52,17 +53,18 @@ class TrainingBluetoothClient(BluetoothClientBase):
         if not self.connected:
             raise RuntimeError("Not connected to device")
         
-        self.send_command(f"CMD REQ {filename}")
+        with self._sock_lock:
+            self.send_command(f"CMD REQ {filename}")
 
-        header: str = self.recv_line()
-        parts: List[str] = header.split()
-        if parts[:3] != ["CMD", "SEND", "OUT"]:
-            raise RuntimeError(f"Invalid server response: {header}")
+            header: str = self.recv_line()
+            parts: List[str] = header.split()
+            if parts[:3] != ["CMD", "SEND", "OUT"]:
+                raise RuntimeError(f"Invalid server response: {header}")
 
-        filesize: int = int(parts[4])
-        self.send_bytes(b"READY\n")
+            filesize: int = int(parts[4])
+            self.send_bytes(b"READY\n")
 
-        self.save_received_data(save_path, filesize)
+            self.save_received_data(save_path, filesize)
     
     def start_training(self, training_id: str) -> str:
         """Start training on device.
@@ -76,8 +78,9 @@ class TrainingBluetoothClient(BluetoothClientBase):
         if not self.connected:
             raise RuntimeError("Not connected to device")
         
-        self.send_command(f"CMD START {training_id}")
-        return self.recv_line()
+        with self._sock_lock:
+            self.send_command(f"CMD START {training_id}")
+            return self.recv_line()
     
     def stop_training(self) -> str:
         """Stop training on device.
@@ -88,8 +91,9 @@ class TrainingBluetoothClient(BluetoothClientBase):
         if not self.connected:
             raise RuntimeError("Not connected to device")
         
-        self.send_command("CMD STOP")
-        return self.recv_line()
+        with self._sock_lock:
+            self.send_command("CMD STOP")
+            return self.recv_line()
     
     def ping(self) -> bool:
         """Send heartbeat ping to server.
@@ -101,12 +105,22 @@ class TrainingBluetoothClient(BluetoothClientBase):
             return False
         
         try:
-            self.send_command("CMD PING")
-            resp: str = self.recv_line()
+            with self._sock_lock:
+                self.send_command("CMD PING")
+                resp: str = self.recv_line()
             return resp == "PONG"
         except:
             self.connected = False
             return False
+
+    def get_status(self) -> str:
+        """Request server heartbeat status string."""
+        if not self.connected:
+            raise RuntimeError("Not connected to device")
+        with self._sock_lock:
+            self.send_command("CMD STATUS")
+            return self.recv_line()
+
 
 def print_help() -> None:
     """Print available commands."""
