@@ -4,6 +4,7 @@ import os
 from typing import Any
 import yaml
 
+from ADU200 import ADU200
 import LeverBase
 
 class TrainingRunnerBase:
@@ -54,6 +55,7 @@ class TrainingRunnerBase:
         return TrainingClass
 
     def run(self):
-        pass
+        ADU200.get_instance()
+        raise NotImplementedError("Subclasses of TrainingRunnerBase must implement the run() method.")
 
     
