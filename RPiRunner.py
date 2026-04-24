@@ -12,8 +12,15 @@ class RPIRunner(TrainingRunnerBase):
     def run(self):
         lever_1_name: str = self.global_params.get('Lever1Name', {})
         lever_2_name: str = self.global_params.get('Lever2Name', {})
-        lever1_pin: int = self.global_params.get("Lever1_Relay_Port", {}).get('actual', -1)
-        lever2_pin: int = self.global_params.get("Lever2_Relay_Port", {}).get('actual', -1)
+        
+        lever1_pin = -1
+        lever2_pin = -1
+
+        try:
+            lever1_pin: int = self.global_params.get("Lever1_Relay_Port", {})
+            lever2_pin: int = self.global_params.get("Lever2_Relay_Port", {})
+        except KeyError:
+            raise ValueError("One or both lever relay ports are not specified.")
 
         lever_1:LeverBase = SwitchLever(lever_1_name, lever1_pin)
         lever_2:LeverBase = SwitchLever(lever_2_name, lever2_pin)
