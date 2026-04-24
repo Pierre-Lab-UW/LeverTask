@@ -97,7 +97,7 @@ class TrainingBluetoothServer(BluetoothServerBase):
             return
 
         self.active_process = subprocess.Popen([
-            "sudo python3", runner_script, merged_path
+            "python3", runner_script, merged_path
         ])
 
         self.send_bytes(b"OK\n")
