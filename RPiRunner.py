@@ -39,6 +39,8 @@ class RPIRunner(TrainingRunnerBase):
                 lever_2.update()
                 training_instance.update()
                 if training_instance.should_end_traning():
+                    training_instance.stop_event()
+                    self.on_finish()
                     break
             except Exception as e:
                 raise Exception("Error when executing task: {}".format(e))

@@ -72,6 +72,7 @@ class PyGameSimulationRunner(TrainingRunnerBase):
             if training_instance.should_end_traning():
                 training_instance.stop_event()
                 pygame.quit()
+                self.on_finish()
                 sys.exit(0)
             ev = pygame.event.get()
             lever_pygame_1.pygame_events = ev
@@ -80,12 +81,14 @@ class PyGameSimulationRunner(TrainingRunnerBase):
                 if event.type == QUIT:
                     training_instance.stop_event()
                     pygame.quit()
+                    self.on_finish()
                     sys.exit(0)
             window.fill([255,255,255])
             lever_pygame_1.update()
             lever_pygame_2.update()
             training_instance.update()
             pygame.display.update()
+        
 
 if __name__ == "__main__":
     # Command line arguments: training class name, parameter file    
