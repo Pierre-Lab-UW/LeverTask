@@ -66,7 +66,8 @@ class TrainingBluetoothGUI(TrainingGUI):
         self.request_btn.grid(row=1, column=5, columnspan=2, pady=6)
 
         self.bt_status_var = tk.StringVar(value='Bluetooth: disconnected')
-        ttk.Label(self.bt_frame, textvariable=self.bt_status_var).grid(row=2, column=0, columnspan=6, pady=(6,0), sticky='w')
+        self.bt_status_label = ttk.Label(self.bt_frame, textvariable=self.bt_status_var, foreground='red')
+        self.bt_status_label.grid(row=2, column=0, columnspan=6, pady=(6,0), sticky='w')
 
         self.set_run_controls_visible(False)
     # --- Bluetooth helper wrappers (run in threads) ---
@@ -154,6 +155,8 @@ class TrainingBluetoothGUI(TrainingGUI):
     # --- Bluetooth monitor helpers ---
     def _set_bt_status(self, status: str) -> None:
         self.bt_status_var.set(f'Bluetooth: {status}')
+        color = 'red' if status == 'disconnected' else 'green'
+        self.bt_status_label.config(foreground=color)
 
     def _start_bt_monitor(self):
         self._stop_bt_monitor()
