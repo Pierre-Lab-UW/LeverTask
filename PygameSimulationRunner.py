@@ -52,6 +52,7 @@ class PyGameSimulationRunner(TrainingRunnerBase):
         super().__init__(input_args)
     
     def run(self):
+        super().run()
         lever_1_name: str = self.global_params.get('Lever1Name', {})
         lever_2_name: str = self.global_params.get('Lever2Name', {})
 
