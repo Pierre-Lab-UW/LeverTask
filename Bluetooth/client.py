@@ -112,8 +112,8 @@ def print_help() -> None:
     """Print available commands."""
     print("\n=== Available Commands ===")
     print("  send <training_id> <file_path>")
-    print("      Send a file to the device")
-    print("      Example: send training1 /path/to/config.yaml")
+    print("      Send a merged training YAML file to the device")
+    print("      Example: send training1 /path/to/MergedTrainingFile.yaml")
     print()
     print("  request <filename> <save_path>")
     print("      Request a file from the device")

@@ -65,7 +65,8 @@ class Training:
         pass        
     
     def get_param(self, param_name, default=None):
-       '''Gets the value of a parameter.
+       '''
+       Gets the value of a parameter.
            
          Parameters
          ----------

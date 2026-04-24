@@ -69,18 +69,35 @@ class TrainingBluetoothServer(BluetoothServerBase):
         training_id: str = parts[2]
         path: str = os.path.join(self.rx_dir, training_id)
 
-        # Check if required files exist
-        if (not os.path.isdir(path) or 
-            not os.path.isfile(os.path.join(path, "GlobalParameters.yaml")) or 
-            not os.path.isfile(os.path.join(path, "RatioTraining.yaml"))):
-            self.send_message("ERR: Missing required files!")
+        if not os.path.isdir(path):
+            self.send_message("ERR: Missing training directory")
             return
 
-        # Start training process
+        yaml_files = [f for f in os.listdir(path) if f.lower().endswith(('.yaml', '.yml'))]
+        if not yaml_files:
+            self.send_message("ERR: No YAML training file found")
+            return
+
+        merged_file = None
+        if len(yaml_files) == 1:
+            merged_file = yaml_files[0]
+        else:
+            for filename in yaml_files:
+                if 'merged' in filename.lower() or 'parameters_global' in open(os.path.join(path, filename), 'r', encoding='utf-8').read():
+                    merged_file = filename
+                    break
+            if not merged_file:
+                self.send_message("ERR: Multiple YAML files found; expected a single merged training file")
+                return
+
+        merged_path = os.path.join(path, merged_file)
+        runner_script = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'RPiRunner.py'))
+        if not os.path.isfile(runner_script):
+            self.send_message("ERR: RPi runner not found on device")
+            return
+
         self.active_process = subprocess.Popen([
-            "python3", "main.py",
-            os.path.join(path, "GlobalParameters.yaml"),
-            os.path.join(path, "RatioTraining.yaml")
+            "python3", runner_script, merged_path
         ])
 
         self.send_bytes(b"OK\n")

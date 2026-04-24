@@ -120,9 +120,12 @@ class TrainingBluetoothGUI(TrainingGUI):
         if not self.bt_client:
             messagebox.showwarning('Bluetooth', 'Not connected')
             return
-        # Ask explicitly for training file to send (pre-fill with current selection if available)
         initfile = str(getattr(self, 'current_file_path', ''))
-        training_path = filedialog.askopenfilename(title='Select training YAML to send', initialfile=initfile, filetypes=[('YAML','*.yaml;*.yml'),('All','*.*')])
+        training_path = filedialog.askopenfilename(
+            title='Select merged training YAML to send',
+            initialfile=initfile,
+            filetypes=[('YAML','*.yaml;*.yml'),('All','*.*')]
+        )
         if not training_path:
             return
 
@@ -131,16 +134,9 @@ class TrainingBluetoothGUI(TrainingGUI):
         if not training_id:
             return
 
-        # ask for GlobalParameters file (optional)
-        global_path = filedialog.askopenfilename(title='Select GlobalParameters file to send (optional)', filetypes=[('YAML','*.yaml;*.yml'),('All','*.*')])
-
         def do_send():
             try:
-                self.status_var.set('Sending files...')
-                # send global params first if provided
-                if global_path:
-                    self.bt_client.send_file(training_id, global_path)
-                # send the selected training yaml
+                self.status_var.set('Sending merged training file...')
                 resp = self.bt_client.send_file(training_id, training_path)
                 self.status_var.set('Send complete')
                 messagebox.showinfo('Send', f'Server response: {resp}')
