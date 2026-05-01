@@ -7,6 +7,7 @@ import sys
 
 class RPIRunner(TrainingRunnerBase):
     def __init__(self, input_args: list[str]):
+        self.file_path = input_args[1]
         super().__init__(input_args)
     
     def run(self):
@@ -31,7 +32,7 @@ class RPIRunner(TrainingRunnerBase):
         lever_2.add_event(DebugEvent("debug", lever_2))
 
         TrainingClass = self.get_training_class_instance()
-        training_instance = TrainingClass(lever_1, lever_2, self.training_params, self.global_params)
+        training_instance = TrainingClass(lever_1, lever_2, self.training_params, self.global_params, self.file_path[:self.file_path.rfind('/')])
         training_instance.start_event()
 
         while True:

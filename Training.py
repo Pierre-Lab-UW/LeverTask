@@ -45,11 +45,20 @@ class Training:
         
         return instance
 
-    def __init__(self, lever1: LeverBase, lever2: LeverBase, params_yaml_dict: dict, global_params_dict: dict):
+    def __init__(self, lever1: LeverBase, lever2: LeverBase, params_yaml_dict: dict, global_params_dict: dict, output_path_base: str = ""):
         self.lever1: LeverBase = lever1
         self.lever2: LeverBase = lever2
         self.params = params_yaml_dict
         self.global_params = global_params_dict
+        self.output_path_base = output_path_base
+
+        if self.lever1 is None or self.lever2 is None:
+            raise ValueError("Both lever1 and lever2 must be provided and not None.")
+        #check type of dictionaries
+        if not isinstance(self.params, dict):
+            raise ValueError("params_yaml_dict must be a dictionary.")
+        if not isinstance(self.global_params, dict):
+            raise ValueError("global_params_dict must be a dictionary.")
         self.start_time: float = 0.0
 
     def start_event(self):

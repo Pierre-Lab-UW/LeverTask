@@ -12,9 +12,9 @@ import os
 class RatioTraining(Training):
     def __init__(
         self, lever1: LeverBase, lever2: LeverBase, params_yaml_dict: dict, global_params_dict: dict
-    ) -> None:
+    , output_path_base: str = "") -> None:
     
-        super().__init__(lever1, lever2, params_yaml_dict, global_params_dict)
+        super().__init__(lever1, lever2, params_yaml_dict, global_params_dict, output_path_base)
 
         # per-lever press counts
         self.press_counts: Dict[str, int] = {
@@ -71,7 +71,7 @@ class RatioTraining(Training):
             },
         }
 
-        self.output_data_file = f"OutputData/{self.get_global_param('Subject')}_RatioTraining_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        self.output_data_file = f"{self.output_path_base}/OutputData/{self.get_global_param('Subject')}_RatioTraining_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 
     def get_lever_by_name(self, name: str) -> Optional[LeverBase]:
         if self.lever1.name == name:
@@ -81,8 +81,8 @@ class RatioTraining(Training):
         raise Exception(f"Lever with name {name} not found.");
 
     def create_timestamped_csv(self):
-        if not os.path.exists("OutputData"):
-            os.makedirs("OutputData")
+        if not os.path.exists(f"{self.output_path_base}/OutputData"):
+            os.makedirs(f"{self.output_path_base}/OutputData")
 
         header = [
             "Response (LP cumulative)",

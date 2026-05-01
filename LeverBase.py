@@ -96,6 +96,9 @@ class LeverBase():
         val : bool 
             A boolean representing if the lever should process events when it is being pressed.
         """
+        for ev in self.events:
+            ev.on_lever_active_state_change(self.active, val)
         self.active = val
+        
     
     

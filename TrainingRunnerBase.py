@@ -59,4 +59,5 @@ class TrainingRunnerBase:
 
     def on_finish(self):
         print("Training finished. Performing cleanup...")
-        ADU200.get_instance().disconnect()
+        if ADU200.get_instance() is not None:
+            ADU200.get_instance().disconnect()
