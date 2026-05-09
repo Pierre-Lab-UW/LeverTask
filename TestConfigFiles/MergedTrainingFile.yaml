@@ -44,11 +44,11 @@ parameters_RatioTraining:
     default: false
     type: bool
   Lev2_ITI:
-    actual: 10
+    actual: 5
     default: 3
     type: int
   Lev2_Iteration:
-    actual: 5
+    actual: 2
     default: 100
     description: Number of trials for Lever 2
     type: int
@@ -104,25 +104,30 @@ parameters_global:
     description: Lever2 Name
     type: str
   Lever1_Relay_Port:
-    actual: 0
+    actual: '0'
     default: 1
     description: Relay Port that Lever 1 is connected to.
-    type: int
+    options:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: dropdown
   Lever2Name:
     actual: Lever2
     default: Lever2
     description: Lever2 Name
     type: str
   Lever2_Relay_Port:
-    actual: 2
+    actual: '2'
     default: 2
-    description: Relay Port that Lever 2 is connected to.
-    type: int
-  NumberOfTrials:
-    actual: 100
-    default: 100
-    description: Number of trials in session
-    type: int
+    description: Relay Port that Lever 2 is connected to (0-3).
+    options:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: dropdown
   Obs:
     actual: mr
     default: mr

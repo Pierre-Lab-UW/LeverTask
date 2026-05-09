@@ -246,10 +246,11 @@ class TrainingGUI(tk.Tk):
                 label = ttk.Label(self.params_frame, text=key+':')
                 label.grid(row=row, column=0, sticky='e', padx=6, pady=4)
                 opts = meta.get('options', [])
+                subtype = meta.get('subtype', 'str')
                 var = tk.StringVar(value=str(actual))
                 cmb = ttk.Combobox(self.params_frame, textvariable=var, values=opts, state='readonly')
                 cmb.grid(row=row, column=1, sticky='w', padx=6, pady=4)
-                self.param_widgets[key] = (ptype, var)
+                self.param_widgets[key] = (ptype, var, subtype)
                 if description:
                     self.Tooltip(label, description)
                 row += 1
@@ -259,7 +260,7 @@ class TrainingGUI(tk.Tk):
                 var = tk.BooleanVar(value=bool(actual))
                 chk = ttk.Checkbutton(self.params_frame, text=key, variable=var)
                 chk.grid(row=row, column=0, columnspan=2, sticky='w', padx=6, pady=4)
-                self.param_widgets[key] = (ptype, var)
+                self.param_widgets[key] = (ptype, var, None)
                 if description:
                     self.Tooltip(chk, description)
                 row += 1
@@ -271,7 +272,7 @@ class TrainingGUI(tk.Tk):
                 var = tk.StringVar(value=str(actual))
                 ent = ttk.Entry(self.params_frame, textvariable=var, width=40)
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
-                self.param_widgets[key] = (ptype, var)
+                self.param_widgets[key] = (ptype, var, None)
                 if description:
                     self.Tooltip(ent, description)
                 row += 1
@@ -295,7 +296,7 @@ class TrainingGUI(tk.Tk):
                         v.set(file_path)
 
                 ttk.Button(frame, text='Browse', command=_browse).pack(side='left', padx=6)
-                self.param_widgets[key] = (ptype, var)
+                self.param_widgets[key] = (ptype, var, None)
                 if description:
                     self.Tooltip(ent, description)
                 row += 1
@@ -307,7 +308,7 @@ class TrainingGUI(tk.Tk):
                 var = tk.StringVar(value=str(actual))
                 ent = ttk.Entry(self.params_frame, textvariable=var, width=40)
                 ent.grid(row=row, column=1, sticky='w', padx=6, pady=4)
-                self.param_widgets[key] = (ptype, var)
+                self.param_widgets[key] = (ptype, var, None)
                 if description:
                     self.Tooltip(ent, description)
                 row += 1
@@ -334,7 +335,7 @@ class TrainingGUI(tk.Tk):
         if not getattr(self, 'current_yaml_data', None):
             return
 
-        for key, (ptype, var) in self.param_widgets.items():
+        for key, (ptype, var, subtype) in self.param_widgets.items():
             val = var.get()
             if ptype == 'int':
                 try:
@@ -350,6 +351,23 @@ class TrainingGUI(tk.Tk):
                     return
             elif ptype == 'bool':
                 actual_value = bool(val)
+            elif ptype == 'dropdown':
+                if subtype == 'int':
+                    try:
+                        actual_value = int(val)
+                    except ValueError:
+                        messagebox.showerror('Invalid', f'Parameter {key} expects int dropdown value')
+                        return
+                elif subtype == 'float':
+                    try:
+                        actual_value = float(val)
+                    except ValueError:
+                        messagebox.showerror('Invalid', f'Parameter {key} expects float dropdown value')
+                        return
+                elif subtype == 'bool':
+                    actual_value = str(val).strip().lower() in ('1', 'true', 'yes', 'on')
+                else:
+                    actual_value = val
             elif ptype.startswith('list'):
                 try:
                     actual_value = eval(val)

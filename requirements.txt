@@ -2,3 +2,4 @@ pygame
 bluetooth
 Mock.GPIO
 zmq
+hidapi
