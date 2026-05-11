@@ -43,6 +43,17 @@ class LeverEventBase:
         """
         pass
 
+    def on_lever_active_state_change(self, old_active_state: bool, new_active_state: bool):
+        """
+        Called when the active state of the lever changes.
+
+        Parameters
+        ----------
+        new_active_state : bool
+            The new active state of the lever. True if the lever is now active, False if the lever is now inactive.
+        """
+        pass
+
 
 class DebugEvent(LeverEventBase):
     def on_lever_initialize(self):

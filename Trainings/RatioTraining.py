@@ -11,14 +11,10 @@ import os
 
 class RatioTraining(Training):
     def __init__(
-        self,
-        lever1: LeverBase,
-        lever2: LeverBase,
-        param_file: str,
-        global_param_file: str
-    ) -> None:
+        self, lever1: LeverBase, lever2: LeverBase, params_yaml_dict: dict, global_params_dict: dict
+    , output_path_base: str = "") -> None:
     
-        super().__init__(lever1, lever2, param_file, global_param_file)
+        super().__init__(lever1, lever2, params_yaml_dict, global_params_dict, output_path_base)
 
         # per-lever press counts
         self.press_counts: Dict[str, int] = {
@@ -54,6 +50,7 @@ class RatioTraining(Training):
         # per-lever params
         self.lever_params = {
             self.lever1.name: {
+                "LeverNumber": 1,
                 "ratio": self.get_param("Lev1_StartingRatio"),
                 "base_ratio": self.get_param("Lev1_StartingRatio"),
                 "step": self.get_param("Lev1_Iteration"),
@@ -63,6 +60,7 @@ class RatioTraining(Training):
                 "last_reward_time": 0
             },
             self.lever2.name: {
+                "LeverNumber": 2,
                 "ratio": self.get_param("Lev2_StartingRatio"),
                 "base_ratio": self.get_param("Lev2_StartingRatio"),
                 "step": self.get_param("Lev2_Iteration"),
@@ -73,7 +71,7 @@ class RatioTraining(Training):
             },
         }
 
-        self.output_data_file = f"OutputData/{self.get_global_param('Subject')}_RatioTraining_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        self.output_data_file = f"{self.output_path_base}/OutputData/{self.get_global_param('Subject')}_RatioTraining_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 
     def get_lever_by_name(self, name: str) -> Optional[LeverBase]:
         if self.lever1.name == name:
@@ -83,8 +81,8 @@ class RatioTraining(Training):
         raise Exception(f"Lever with name {name} not found.");
 
     def create_timestamped_csv(self):
-        if not os.path.exists("OutputData"):
-            os.makedirs("OutputData")
+        if not os.path.exists(f"{self.output_path_base}/OutputData"):
+            os.makedirs(f"{self.output_path_base}/OutputData")
 
         header = [
             "Response (LP cumulative)",
@@ -152,7 +150,7 @@ class RatioTraining(Training):
                 time.strftime("%Y-%m-%d", time.localtime()),  # current date
                 self.get_global_param("ID", 0),  # ID
                 self.get_global_param("Housing", 0),  # Housing
-                self.get_global_param("obs", 0),  # obs
+                self.get_global_param("Obs", 0),  # obs
                 self.get_global_param("PiSystem", 0),  # PiSystem
                 self.get_global_param("RFID", 0),  # RFID
                 self.get_global_param("Sex", 0),  # Sex
@@ -236,7 +234,7 @@ class RatioTraining(Training):
             
             elapsed = now - cfg["last_reward_time"]
             if elapsed > cfg["iti"]:
-                if self.get_param(f"{lever_name}_Active", True):
+                if self.get_param(f"Lev{cfg['LeverNumber']}_Active", True):
                     lever.set_is_active(True)
                 self.last_lever_press_time = time.time()
                 # update ratio if needed

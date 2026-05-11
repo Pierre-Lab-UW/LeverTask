@@ -22,6 +22,7 @@ parameters:
     - step
     - pulse
     - toggle
+    subtype: str
     type: dropdown
   TaskName:
     actual: SingleStimuliResponse

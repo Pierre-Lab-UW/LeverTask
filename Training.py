@@ -17,10 +17,12 @@ class Training:
         Lever1 (LeverBase): The first lever being used.
         Lever2 (LeverBase) The second lever being used..
     '''
-    def __init__(self, lever1: LeverBase, lever2: LeverBase, params_yaml_path: str, global_params_yaml_path: str):
-        self.lever1: LeverBase = lever1
-        self.lever2: LeverBase = lever2
-        self.start_time: float = 0.0
+
+    @classmethod
+    def from_filepath(cls, lever1: LeverBase, lever2: LeverBase, params_yaml_path: str, global_params_yaml_path: str) -> 'Training':
+        """
+        Factory method to create a Training instance from YAML file paths.
+        """
         # Load parameters from YAML file
         with open(params_yaml_path, 'r') as f:
             yaml_data = yaml.safe_load(f)
@@ -33,12 +35,31 @@ class Training:
         #check if 'parameters' key exists in yaml_data to avoid KeyError
         if 'parameters' not in yaml_data:
             raise KeyError(f"'parameters' key not found in {params_yaml_path}")
-        self.params = {k: v.get('actual', v.get('default')) for k, v in yaml_data['parameters'].items()}
+        training_params = {k: v.get('actual', v.get('default')) for k, v in yaml_data['parameters'].items()}
 
         with open(global_params_yaml_path, 'r') as f:
             yaml_data = yaml.safe_load(f)
         # Use 'actual' value if present, else 'default'
-        self.global_params = {k: v.get('actual', v.get('default')) for k, v in yaml_data['parameters'].items()}
+        global_params = {k: v.get('actual', v.get('default')) for k, v in yaml_data['parameters'].items()}
+        instance = cls(lever1, lever2, training_params, global_params)
+        
+        return instance
+
+    def __init__(self, lever1: LeverBase, lever2: LeverBase, params_yaml_dict: dict, global_params_dict: dict, output_path_base: str = ""):
+        self.lever1: LeverBase = lever1
+        self.lever2: LeverBase = lever2
+        self.params = params_yaml_dict
+        self.global_params = global_params_dict
+        self.output_path_base = output_path_base
+
+        if self.lever1 is None or self.lever2 is None:
+            raise ValueError("Both lever1 and lever2 must be provided and not None.")
+        #check type of dictionaries
+        if not isinstance(self.params, dict):
+            raise ValueError("params_yaml_dict must be a dictionary.")
+        if not isinstance(self.global_params, dict):
+            raise ValueError("global_params_dict must be a dictionary.")
+        self.start_time: float = 0.0
 
     def start_event(self):
         """
@@ -53,7 +74,8 @@ class Training:
         pass        
     
     def get_param(self, param_name, default=None):
-       '''Gets the value of a parameter.
+       '''
+       Gets the value of a parameter.
            
          Parameters
          ----------
@@ -65,6 +87,10 @@ class Training:
          Returns:
              The value of the specified parameter for this training, or default if not found.
        '''
+
+       #throw an error if the parameter is not found in the training params or global params to make it more obvious that there is an issue with the yaml file
+       if param_name not in self.params and param_name not in self.global_params:
+           raise KeyError(f"Parameter '{param_name}' not found in training or global parameters.")
        return self.params.get(param_name, default)
     
     def get_global_param(self, param_name, default=None):
@@ -80,6 +106,9 @@ class Training:
          Returns:
              The value of the specified global parameter for this training, or default if not found.
        '''
+         #throw an error if the parameter is not found in the global params to make it more obvious that there is an issue with the yaml file
+        if param_name not in self.global_params:
+            raise KeyError(f"Global parameter '{param_name}' not found in global parameters.")
         return self.global_params.get(param_name, default)
 
     def update(self):
@@ -92,5 +121,5 @@ class Training:
            Returns:
                 Whether or not the program should end.
         '''
-        return (time.time() - self.start_time) > self.get_global_param("SessionLength", 60)*60
+        return (time.time() - self.start_time) > self.get_global_param("SessionDuration", 60)*60
 
